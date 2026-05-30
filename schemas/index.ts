@@ -37,7 +37,7 @@ export const BoothListWithCongestionResponseSchema = z.object({
 });
 
 export const StampListResponseSchema = z.object({
-  stamps: z.array(CollectedStampSchema),
+  stamps: z.array(BoothSchema),
 });
 
 export const ScanCreateRequestSchema = z.object({

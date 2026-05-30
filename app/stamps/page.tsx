@@ -1,11 +1,11 @@
 "use client";
 
-import { BookOpenCheck, ChevronLeft, Loader2, MapPin, User, Calendar, X } from "lucide-react";
+import { BookOpenCheck, ChevronLeft, Loader2, MapPin, User, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchBooths, fetchStamps } from "@/lib/stamps";
 import { getOrCreateUserId } from "@/lib/user";
-import type { Booth, CollectedStamp } from "@/schemas";
+import type { Booth } from "@/schemas";
 import { Sidebar } from "../_components/Sidebar";
 import { TopBar } from "../_components/TopBar";
 import { Card } from "../_components/ui/Card";
@@ -17,11 +17,11 @@ const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"]
 
 export default function StampsPage() {
   const [booths, setBooths] = useState<Booth[]>([]);
-  const [collectedStamps, setCollectedStamps] = useState<CollectedStamp[]>([]);
+  const [collectedStamps, setCollectedStamps] = useState<Booth[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooth, setSelectedBooth] = useState<{
     booth: Booth;
-    collected?: CollectedStamp;
+    collected?: Booth;
     tone: StampTone;
   } | null>(null);
 
@@ -107,14 +107,6 @@ export default function StampsPage() {
                               tone={tone}
                               size={20}
                             />
-                            {collected && (
-                              <span className="text-base-content/40 mt-1 text-[9px] font-medium tracking-wider uppercase">
-                                {new Date(collected.acquired_at).toLocaleDateString("ja-JP", {
-                                  month: "short",
-                                  day: "numeric",
-                                })}
-                              </span>
-                            )}
                           </button>
                         );
                       })}
@@ -188,28 +180,6 @@ export default function StampsPage() {
                     </div>
                   </div>
                 </div>
-
-                {selectedBooth.collected && (
-                  <div className="bg-primary/10 text-primary flex items-center gap-3 rounded-2xl p-4">
-                    <div className="bg-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm">
-                      <Calendar className="h-5 w-5" />
-                    </div>
-                    <div className="text-left">
-                      <div className="text-primary/60 text-[10px] font-bold tracking-widest uppercase">
-                        Acquired At
-                      </div>
-                      <div className="font-bold">
-                        {new Date(selectedBooth.collected.acquired_at).toLocaleString("ja-JP", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {!selectedBooth.collected && (

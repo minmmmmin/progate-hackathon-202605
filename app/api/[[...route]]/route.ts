@@ -5,7 +5,7 @@ import { getSupabaseAdmin, supabase } from "@/lib/supabase";
 import { createBoothRoute, getBoothsRoute } from "@/routes/booths";
 import { createScanRoute } from "@/routes/scans";
 import { createUserRoute, getMyStampsRoute } from "@/routes/users";
-import type { Booth, CollectedStamp } from "@/schemas";
+import type { Booth } from "@/schemas";
 
 const app = new OpenAPIHono().basePath("/api");
 
@@ -34,23 +34,22 @@ app.openapi(getMyStampsRoute, async (c) => {
 
   const { data, error } = await supabase
     .from("scan_logs")
-    .select("scanned_at, booth:booths ( id, stamp_url, title, room, stallholder )")
-    .eq("user_id", userId)
-    .order("scanned_at", { ascending: true });
+    .select("booth:booths ( id, stamp_url, title, room, stallholder )")
+    .eq("user_id", userId);
 
   if (error) {
     return c.json({ message: "スタンプ取得に失敗しました" }, 500);
   }
 
-  const uniqueStamps = new Map<string, CollectedStamp>();
+  const uniqueBooths = new Map<string, Booth>();
   for (const row of data ?? []) {
-    const booth = Array.isArray(row.booth) ? row.booth[0] : (row.booth as Booth | null);
-    if (booth && !uniqueStamps.has(booth.id)) {
-      uniqueStamps.set(booth.id, { ...booth, acquired_at: row.scanned_at });
+    const booth = Array.isArray(row.booth) ? row.booth[0] : row.booth;
+    if (booth && !uniqueBooths.has(booth.id)) {
+      uniqueBooths.set(booth.id, booth);
     }
   }
 
-  return c.json({ stamps: Array.from(uniqueStamps.values()) }, 200);
+  return c.json({ stamps: Array.from(uniqueBooths.values()) }, 200);
 });
 
 // ブース一覧取得

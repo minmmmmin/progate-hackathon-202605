@@ -1,9 +1,9 @@
-import type { Booth, CollectedStamp } from "@/schemas";
+import type { Booth } from "@/schemas";
 
-const stampsCache = new Map<string, Promise<CollectedStamp[]>>();
+const stampsCache = new Map<string, Promise<Booth[]>>();
 let boothsCache: Promise<Booth[]> | null = null;
 
-export async function fetchStamps(userId: string): Promise<CollectedStamp[]> {
+export async function fetchStamps(userId: string): Promise<Booth[]> {
   const cached = stampsCache.get(userId);
   if (cached) return cached;
 
@@ -15,7 +15,7 @@ export async function fetchStamps(userId: string): Promise<CollectedStamp[]> {
       stampsCache.delete(userId);
       throw new Error("スタンプ取得に失敗しました");
     }
-    const body = (await res.json()) as { stamps: CollectedStamp[] };
+    const body = (await res.json()) as { stamps: Booth[] };
     return body.stamps;
   })();
 

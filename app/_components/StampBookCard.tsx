@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchBooths, fetchStamps } from "@/lib/stamps";
 import { getOrCreateUserId } from "@/lib/user";
-import type { Booth, CollectedStamp } from "@/schemas";
+import type { Booth } from "@/schemas";
 import { Card } from "./ui/Card";
 import { PillButton } from "./ui/PillButton";
 import { StampCircle, type StampTone } from "./ui/StampCircle";
@@ -14,7 +14,7 @@ const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"]
 
 export function StampBookCard() {
   const [booths, setBooths] = useState<Booth[]>([]);
-  const [collectedStamps, setCollectedStamps] = useState<CollectedStamp[]>([]);
+  const [collectedStamps, setCollectedStamps] = useState<Booth[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
