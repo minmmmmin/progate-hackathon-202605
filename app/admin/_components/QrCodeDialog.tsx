@@ -1,10 +1,11 @@
 "use client";
 
-import { Download, X } from "lucide-react";
+import { Download, Printer, X } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { FC, useEffect, useRef, useState } from "react";
 
 import { BASE_URL } from "../../../constants/url";
+import { printPosterForSpot, savePosterForSpot } from "./qrPosterUtils";
 
 type QrCodeDialogProps = {
   open: boolean;
@@ -14,8 +15,6 @@ type QrCodeDialogProps = {
   stampURL: string;
 };
 
-const EXPORT_SIZE = 1024;
-
 export const QrCodeDialog: FC<QrCodeDialogProps> = ({
   open,
   onClose,
@@ -24,8 +23,8 @@ export const QrCodeDialog: FC<QrCodeDialogProps> = ({
   stampURL,
 }) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const qrRef = useRef<HTMLDivElement>(null);
   const [saving, setSaving] = useState(false);
+  const [printing, setPrinting] = useState(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -35,37 +34,33 @@ export const QrCodeDialog: FC<QrCodeDialogProps> = ({
   }, [open]);
 
   const params = new URLSearchParams({ id: spotId });
-
   const qrURL = `${BASE_URL}?${params.toString()}`;
 
-  async function saveAsImage() {
-    const svg = qrRef.current?.querySelector("svg");
-    if (!svg) return;
+  const handleSave = async () => {
     setSaving(true);
     try {
-      const blob = await svgToPngBlob(svg, EXPORT_SIZE);
-      const filename = `${sanitize(spotName) || "stamp"}-qr.png`;
-      const file = new File([blob], filename, { type: "image/png" });
-
-      const canShareFiles =
-        typeof navigator !== "undefined" &&
-        typeof navigator.canShare === "function" &&
-        navigator.canShare({ files: [file] });
-
-      if (canShareFiles) {
-        try {
-          await navigator.share({ files: [file], title: spotName || "スタンプQR" });
-          return;
-        } catch (err) {
-          if ((err as DOMException)?.name === "AbortError") return;
-        }
-      }
-
-      downloadBlob(blob, filename);
+      await savePosterForSpot({
+        spotId,
+        spotName,
+        stampURL,
+      });
     } finally {
       setSaving(false);
     }
-  }
+  };
+
+  const handlePrint = async () => {
+    try {
+      setPrinting(true);
+      await printPosterForSpot({
+        spotId,
+        spotName,
+        stampURL,
+      });
+    } finally {
+      setPrinting(false);
+    }
+  };
 
   if (!open) {
     return null;
@@ -90,7 +85,7 @@ export const QrCodeDialog: FC<QrCodeDialogProps> = ({
         </div>
 
         <div className="bg-base-200 flex flex-col items-center gap-3 rounded-2xl p-5">
-          <div ref={qrRef} className="bg-base-100 rounded-2xl p-4">
+          <div className="bg-base-100 rounded-2xl p-4">
             {qrURL && (
               <QRCodeSVG
                 value={qrURL}
@@ -113,11 +108,20 @@ export const QrCodeDialog: FC<QrCodeDialogProps> = ({
           <button
             type="button"
             className="btn btn-primary flex-1 rounded-full font-semibold"
-            onClick={saveAsImage}
+            onClick={handleSave}
             disabled={saving || !qrURL}
           >
             <Download className="h-4 w-4" />
             {saving ? "保存中…" : "写真に保存"}
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary flex-1 rounded-full font-semibold"
+            onClick={handlePrint}
+            disabled={printing || !qrURL}
+          >
+            <Printer className="h-4 w-4" />
+            {printing ? "処理中…" : "ポスター印刷"}
           </button>
         </div>
       </div>
@@ -126,77 +130,4 @@ export const QrCodeDialog: FC<QrCodeDialogProps> = ({
       </form>
     </dialog>
   );
-};
-
-const svgToPngBlob = async (svg: SVGElement, size: number): Promise<Blob> => {
-  const clone = svg.cloneNode(true) as SVGElement;
-  const image = clone.querySelector("image");
-  if (image) {
-    const src = image.getAttribute("href") || image.getAttribute("xlink:href");
-    if (src && !src.startsWith("data:")) {
-      const base64 = await urlToBase64(src);
-      image.setAttribute("href", base64);
-    }
-  }
-  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-  clone.setAttribute("width", String(size));
-  clone.setAttribute("height", String(size));
-
-  const xml = new XMLSerializer().serializeToString(clone);
-  const svgUrl = URL.createObjectURL(new Blob([xml], { type: "image/svg+xml;charset=utf-8" }));
-
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        URL.revokeObjectURL(svgUrl);
-        reject(new Error("Canvas 2D context unavailable"));
-        return;
-      }
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, size, size);
-      const padding = size * 0.1;
-      ctx.drawImage(img, padding, padding, size - padding * 2, size - padding * 2);
-      URL.revokeObjectURL(svgUrl);
-      canvas.toBlob((blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error("Failed to encode PNG"));
-      }, "image/png");
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(svgUrl);
-      reject(new Error("Failed to load SVG"));
-    };
-    img.src = svgUrl;
-  });
-};
-
-const downloadBlob = (blob: Blob, filename: string) => {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-};
-
-const sanitize = (name: string) => {
-  return name.replace(/[\\/:*?"<>|\s]+/g, "_");
-};
-
-const urlToBase64 = async (url: string): Promise<string> => {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
 };

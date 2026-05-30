@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
-import { X } from "lucide-react";
+import { Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 
 type ScanStatus = "idle" | "loading";
@@ -111,7 +111,8 @@ export const QrScanner = () => {
           onClick={startScanner}
           className="btn btn-primary btn-lg w-full rounded-full shadow-lg"
         >
-          📷 カメラを起動してスタンプGET
+          <Camera className="h-5 w-5" />
+          カメラを起動してスタンプGET
         </button>
       )}
 
