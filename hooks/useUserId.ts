@@ -11,7 +11,7 @@ type UseUserIdReturn = {
   error: Error | undefined;
 };
 
-export function useUserId(): UseUserIdReturn {
+export const useUserId = (): UseUserIdReturn => {
   const [storedUserId, setStoredUserId] = useLocalStorage<string>(STORAGE_KEY);
   const [isLoading, setIsLoading] = useState(!storedUserId);
   const [error, setError] = useState<Error | undefined>();
@@ -48,4 +48,4 @@ export function useUserId(): UseUserIdReturn {
   }, [storedUserId, createUser, setStoredUserId]);
 
   return { userId: storedUserId, isLoading, error };
-}
+};

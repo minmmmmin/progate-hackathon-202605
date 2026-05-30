@@ -5,7 +5,7 @@ import { RecommendedSpotsCard } from "./_components/RecommendedSpotsCard";
 import { Sidebar } from "./_components/Sidebar";
 import { StampBookCard } from "./_components/StampBookCard";
 import { TopBar } from "./_components/TopBar";
-import { useUserId } from "./_hooks/useUserId";
+import { useUserId } from "../hooks/useUserId";
 
 const DRAWER_ID = "main-drawer";
 

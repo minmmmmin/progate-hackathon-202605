@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { X } from "lucide-react";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/useToast";
 
 type ScanStatus = "idle" | "loading";
 
@@ -12,6 +12,8 @@ const FIXED_USER_ID = "34687da4-c380-4a26-a728-ee85c330bdf0";
 export const QrScanner = () => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [scanStatus, setScanStatus] = useState<ScanStatus>("idle");
+
+  const { showSuccess, showError } = useToast();
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const isProcessingRef = useRef(false);
@@ -38,7 +40,7 @@ export const QrScanner = () => {
       } catch (err) {
         console.error("カメラ起動エラー:", err);
         setIsCameraOpen(false);
-        toast.error("カメラの起動に失敗しました。権限設定を確認してください。");
+        showError("カメラの起動に失敗しました。権限設定を確認してください。");
       }
     }, 100);
   };
@@ -82,13 +84,13 @@ export const QrScanner = () => {
 
       await stopScanner();
       if (res.ok) {
-        toast.success("🎉 スタンプを獲得しました！");
+        showSuccess("スタンプを獲得しました！");
       } else {
-        toast.error(`❌ ${data.message || "エラーが発生しました"}`);
+        showError(data.message || "エラーが発生しました");
       }
     } catch (err) {
       await stopScanner();
-      toast.error(`❌ ${err instanceof Error ? err.message : "通信エラーが発生しました。"}`);
+      showError(err instanceof Error ? err.message : "通信エラーが発生しました。");
     } finally {
       setScanStatus("idle");
     }
