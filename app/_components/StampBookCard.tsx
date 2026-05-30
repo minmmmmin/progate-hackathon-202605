@@ -55,7 +55,7 @@ export function StampBookCard() {
         {loading
           ? Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-2">
-                <div className="bg-base-content/5 aspect-square w-full max-w-20 animate-pulse rounded-full" />
+                <div className="bg-base-content/5 aspect-square w-full max-w-24 animate-pulse rounded-full" />
                 <div className="bg-base-content/5 h-3 w-12 animate-pulse rounded" />
               </div>
             ))
@@ -82,7 +82,7 @@ export function StampBookCard() {
               trailing={<ChevronRight className="h-4 w-4" />}
               className="w-full"
             >
-              スタンプ帳をもっとみる！
+              スタンプ帳をもっとみる
             </PillButton>
           </Link>
         </div>

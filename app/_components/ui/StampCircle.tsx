@@ -28,7 +28,7 @@ const toneClass: Record<StampTone, string> = {
 
 // Tailwind がパージしないようリテラルで定義
 const sizeClass: Record<StampSize, string> = {
-  20: "w-full max-w-20",
+  20: "w-full max-w-24",
   24: "w-full max-w-24",
   32: "w-full max-w-32",
 };
