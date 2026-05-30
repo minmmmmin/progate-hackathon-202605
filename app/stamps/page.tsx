@@ -213,9 +213,9 @@ export default function StampsPage() {
               </div>
 
               {!selectedBooth.collected && (
-                <div className="bg-secondary/10 text-secondary mt-8 rounded-2xl px-6 py-4">
+                <div className="bg-base-200 text-base-content/70 mt-8 rounded-2xl px-6 py-4">
                   <p className="text-sm font-bold">まだスタンプを持っていません</p>
-                  <p className="mt-1 text-xs opacity-70">
+                  <p className="text-base-content/50 mt-1 text-xs">
                     {selectedBooth.booth.room}に行ってスタンプをゲットしよう！
                   </p>
                 </div>
