@@ -6,17 +6,17 @@ export const UserSchema = z.object({
 });
 
 export const BoothSchema = z.object({
-  id: z.number().int().openapi({ example: 1 }),
+  id: z.uuid().openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
   stamp_url: z.string().openapi({ example: "https://example.com/stamp.png" }),
-  title: z.string().openapi({ example: "1-A 焼きそば" }),
+  title: z.string().openapi({ example: "焼きそば" }),
   room: z.string().openapi({ example: "101教室" }),
-  stallholder: z.string().openapi({ example: "1-A クラス" }),
+  stallholder: z.string().openapi({ example: "1-A" }),
 });
 
 export const ScanLogSchema = z.object({
   id: z.number().int().openapi({ example: 1 }),
   user_id: z.uuid().openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
-  booth_id: z.number().int().openapi({ example: 1 }),
+  booth_id: z.uuid().openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
   scanned_at: z.iso.datetime().openapi({ example: "2026-05-29T12:34:56.000Z" }),
 });
 
@@ -34,7 +34,7 @@ export const StampListResponseSchema = z.object({
 
 export const ScanCreateRequestSchema = z.object({
   user_id: z.uuid().openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
-  booth_id: z.number().int().openapi({ example: 1 }),
+  booth_id: z.uuid().openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
 });
 
 export const ScanResponseSchema = z.object({

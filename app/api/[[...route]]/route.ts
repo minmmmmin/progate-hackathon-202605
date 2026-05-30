@@ -38,7 +38,7 @@ app.openapi(getMyStampsRoute, async (c) => {
     return c.json({ message: "スタンプ取得に失敗しました" }, 500);
   }
 
-  const uniqueBooths = new Map<number, Booth>();
+  const uniqueBooths = new Map<string, Booth>();
   for (const row of data ?? []) {
     const booth = Array.isArray(row.booth) ? row.booth[0] : row.booth;
     if (booth && !uniqueBooths.has(booth.id)) {
