@@ -100,20 +100,13 @@ export default function StampsPage() {
                             className="group flex flex-col items-center transition-transform active:scale-95"
                             onClick={() => setSelectedBooth({ booth, collected, tone })}
                           >
-                            <div className="relative flex w-full flex-col items-center">
-                              <StampCircle
-                                state={collected ? "collected" : "locked"}
-                                imageSrc={collected ? booth.stamp_url : undefined}
-                                label={booth.title}
-                                tone={tone}
-                                size={20}
-                              />
-                              {collected && (
-                                <div className="bg-primary absolute top-0 right-[15%] flex h-5 w-5 items-center justify-center rounded-full border-2 border-white shadow-sm sm:h-6 sm:w-6">
-                                  <span className="text-[10px] font-bold text-white">OK</span>
-                                </div>
-                              )}
-                            </div>
+                            <StampCircle
+                              state={collected ? "collected" : "locked"}
+                              imageSrc={collected ? booth.stamp_url : undefined}
+                              label={booth.title}
+                              tone={tone}
+                              size={20}
+                            />
                             {collected && (
                               <span className="text-base-content/40 mt-1 text-[9px] font-medium tracking-wider uppercase">
                                 {new Date(collected.acquired_at).toLocaleDateString("ja-JP", {
@@ -148,22 +141,21 @@ export default function StampsPage() {
                   : "from-base-200 to-base-300"
               } relative flex items-center justify-center`}
             >
-              <button 
+              <button
                 className="btn btn-circle btn-sm btn-ghost absolute top-4 right-4"
                 onClick={() => setSelectedBooth(null)}
               >
                 <X className="h-5 w-5" />
               </button>
-              <div className="mt-16 transform translate-y-4 w-32">
+              <div className="mt-16 w-32 translate-y-4 transform">
                 <StampCircle
                   state={selectedBooth.collected ? "collected" : "locked"}
                   imageSrc={selectedBooth.collected ? selectedBooth.booth.stamp_url : undefined}
-                  label=""
                   tone={selectedBooth.tone}
                   size={32}
                 />
               </div>
-              </div>
+            </div>
 
             <div className="flex flex-col items-center px-6 pt-16 pb-8 text-center">
               <h3 className="text-base-content text-2xl font-black tracking-tight italic">

@@ -1,19 +1,20 @@
 import type { ReactNode } from "react";
 
 export type StampTone = "pink" | "peach" | "mint" | "sky" | "lemon" | "lavender";
+export type StampSize = 20 | 24 | 32;
 
 type StampCircleProps =
   | {
       state: "collected";
       icon?: ReactNode;
       imageSrc?: string;
-      label: string;
+      label?: string;
       tone: StampTone;
     }
-  | { state: "locked"; label: string };
+  | { state: "locked"; label?: string };
 
 type Props = StampCircleProps & {
-  size?: number | string;
+  size?: StampSize;
 };
 
 const toneClass: Record<StampTone, string> = {
@@ -25,26 +26,25 @@ const toneClass: Record<StampTone, string> = {
   lavender: "bg-violet-100 text-violet-700",
 };
 
+// Tailwind がパージしないようリテラルで定義
+const sizeClass: Record<StampSize, string> = {
+  20: "w-full max-w-20",
+  24: "w-full max-w-24",
+  32: "w-full max-w-32",
+};
+
 export function StampCircle({ size = 20, ...props }: Props) {
-  // Tailwindのクラスがパージされないよう、リテラルで定義
-  const sizeClasses = {
-    20: "w-full max-w-20",
-    24: "w-full max-w-24",
-    32: "w-full max-w-32",
-  };
-
-  const sizeClass = sizeClasses[size as keyof typeof sizeClasses] || "w-full max-w-20";
-
   return (
-    <div className={`flex flex-col items-center gap-2 ${sizeClass}`}>
+    <div className={`flex flex-col items-center gap-2 ${sizeClass[size]}`}>
       {props.state === "collected" ? (
         <div
           className={`flex aspect-square w-full items-center justify-center rounded-full shadow-[inset_0_-4px_10px_rgba(0,0,0,0.06)] ${toneClass[props.tone]}`}
         >
           {props.imageSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={props.imageSrc}
-              alt={props.label}
+              alt={props.label ?? ""}
               className="h-[50%] w-[50%] object-contain"
             />
           ) : (
