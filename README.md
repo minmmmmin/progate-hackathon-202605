@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 文化祭スタンプラリー
 
-## Getting Started
+来場者が模擬店や展示を回りながらスマホでスタンプを集め、運営側はスポットや混雑情報を管理できる「文化祭スタンプラリー」アプリのリポジトリです。
 
-First, run the development server:
+## 目的
+- **誰のために**: 文化祭の来場者と運営する学生
+- **何のために**: 「どこ行こう？」の悩みを解消し、回遊を促進、混雑の偏りを減らす
+
+## 来場者向け主な機能
+- **QR スキャンでスタンプ取得**: ブースに設置された QR を読み取ってスタンプを獲得
+- **スタンプ進捗の可視化**: 集めたスタンプ一覧と達成状況を表示
+- **混雑状況の確認**: リアルタイムまたは近似の混雑度を確認
+- **空いているブースのおすすめ表示**: 混雑を避けるためのおすすめルート／ブース提示
+
+## 運営向け主な機能
+- **スタンプスポット管理**: スポットの登録・編集・削除
+- **QR コード管理**: 各スポットの QR を発行・更新
+- **混雑状況の更新**: 手動または自動で混雑度を更新
+- **来場者の取得データ確認**: スタンプ取得数や人気スポットの可視化（匿名化推奨）
+
+## 挑戦・目標
+- リアルタイムで変化する混雑状況の可視化
+- ポップで直感的なデザイン（小さい子ども〜高齢者まで）
+- 軽量でスマホに最適化された UI/UX
+- 「次はどこ行こう？」を後押しする回遊体験づくり
+
+
+## 開発ローカルの起動
+1. 依存インストール:
+
+```bash
+npm install
+```
+
+2. 開発サーバ起動:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ブラウザで `http://localhost:3000` を開いて確認してください。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ディレクトリの主な役割
+- `app/`: Next.js のページとレイアウト（来場者向け画面・運営向け管理画面）
+- `public/`: 画像や生成した QR コードなどの静的資産
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+## 開発ルール
+- ブランチ運用・コミット・PR のルールは [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
