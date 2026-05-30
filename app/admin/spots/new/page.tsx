@@ -138,7 +138,7 @@ export default function NewSpotPage() {
                 icon={<Type className="text-base-content/50 h-4 w-4" />}
                 value={title}
                 onChange={setTitle}
-                placeholder="例: 1-A やきそば"
+                placeholder="やきそば"
                 autoComplete="off"
                 maxLength={50}
               />
