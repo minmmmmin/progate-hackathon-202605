@@ -128,8 +128,16 @@ export const QrCodeDialog: FC<QrCodeDialogProps> = ({
   );
 };
 
-const svgToPngBlob = (svg: SVGElement, size: number): Promise<Blob> => {
+const svgToPngBlob = async (svg: SVGElement, size: number): Promise<Blob> => {
   const clone = svg.cloneNode(true) as SVGElement;
+  const image = clone.querySelector("image");
+  if (image) {
+    const src = image.getAttribute("href") || image.getAttribute("xlink:href");
+    if (src && !src.startsWith("data:")) {
+      const base64 = await urlToBase64(src);
+      image.setAttribute("href", base64);
+    }
+  }
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
   clone.setAttribute("width", String(size));
   clone.setAttribute("height", String(size));
@@ -151,7 +159,8 @@ const svgToPngBlob = (svg: SVGElement, size: number): Promise<Blob> => {
       }
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, size, size);
-      ctx.drawImage(img, 0, 0, size, size);
+      const padding = size * 0.1;
+      ctx.drawImage(img, padding, padding, size - padding * 2, size - padding * 2);
       URL.revokeObjectURL(svgUrl);
       canvas.toBlob((blob) => {
         if (blob) resolve(blob);
@@ -179,4 +188,15 @@ const downloadBlob = (blob: Blob, filename: string) => {
 
 const sanitize = (name: string) => {
   return name.replace(/[\\/:*?"<>|\s]+/g, "_");
+};
+
+const urlToBase64 = async (url: string): Promise<string> => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 };
