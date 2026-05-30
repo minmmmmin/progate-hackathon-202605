@@ -11,6 +11,9 @@ const app = new OpenAPIHono().basePath("/api");
 
 const STAMPS_BUCKET = "stamps";
 
+// 混雑状況の算出に使う直近の時間範囲（分）
+const CONGESTION_WINDOW_MINUTES = 120;
+
 // ユーザー作成
 app.openapi(createUserRoute, async (c) => {
   const supabaseAdmin = getSupabaseAdmin();
@@ -57,7 +60,29 @@ app.openapi(getBoothsRoute, async (c) => {
     return c.json({ message: "ブース取得に失敗しました" }, 500);
   }
 
-  return c.json({ booths: data }, 200);
+  // 直近のスキャン数をブースごとに集計
+  const since = new Date(Date.now() - CONGESTION_WINDOW_MINUTES * 60 * 1000).toISOString();
+
+  const { data: scanLogs, error: scanError } = await supabase
+    .from("scan_logs")
+    .select("booth_id")
+    .gte("scanned_at", since);
+
+  if (scanError) {
+    return c.json({ message: "スキャン履歴の取得に失敗しました" }, 500);
+  }
+
+  const congestionMap = new Map<string, number>();
+  for (const log of scanLogs ?? []) {
+    congestionMap.set(log.booth_id, (congestionMap.get(log.booth_id) ?? 0) + 1);
+  }
+
+  const boothsWithCongestion = (data ?? []).map((booth) => ({
+    ...booth,
+    congestion_score: congestionMap.get(booth.id) ?? 0,
+  }));
+
+  return c.json({ booths: boothsWithCongestion }, 200);
 });
 
 // ブース登録＆スタンプ画像アップロード

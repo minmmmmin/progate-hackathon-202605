@@ -24,8 +24,16 @@ export const UserIdResponseSchema = z.object({
   user_id: z.uuid().openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
 });
 
+export const BoothWithCongestionSchema = BoothSchema.extend({
+  congestion_score: z.number().int().openapi({ example: 5 }),
+});
+
 export const BoothListResponseSchema = z.object({
   booths: z.array(BoothSchema),
+});
+
+export const BoothListWithCongestionResponseSchema = z.object({
+  booths: z.array(BoothWithCongestionSchema),
 });
 
 export const StampListResponseSchema = z.object({
@@ -52,9 +60,11 @@ export const ErrorResponseSchema = z.object({
 
 export type User = z.infer<typeof UserSchema>;
 export type Booth = z.infer<typeof BoothSchema>;
+export type BoothWithCongestion = z.infer<typeof BoothWithCongestionSchema>;
 export type ScanLog = z.infer<typeof ScanLogSchema>;
 export type UserIdResponse = z.infer<typeof UserIdResponseSchema>;
 export type BoothListResponse = z.infer<typeof BoothListResponseSchema>;
+export type BoothListWithCongestionResponse = z.infer<typeof BoothListWithCongestionResponseSchema>;
 export type StampListResponse = z.infer<typeof StampListResponseSchema>;
 export type ScanCreateRequest = z.infer<typeof ScanCreateRequestSchema>;
 export type ScanResponse = z.infer<typeof ScanResponseSchema>;
