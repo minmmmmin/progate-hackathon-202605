@@ -1,9 +1,5 @@
 import { createRoute } from "@hono/zod-openapi";
-import {
-  BoothListResponseSchema,
-  BoothSchema,
-  ErrorResponseSchema,
-} from "@/schemas";
+import { BoothListResponseSchema, BoothSchema, ErrorResponseSchema } from "@/schemas";
 
 export const getBoothsRoute = createRoute({
   method: "get",

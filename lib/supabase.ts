@@ -7,8 +7,13 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const getSupabaseAdmin = () => {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required");
+
+  if (!supabaseUrl) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL is required in your environment variables.");
+  }
+
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required in your environment variables.");
   }
 
   return createClient(supabaseUrl, serviceRoleKey, {

@@ -1,9 +1,5 @@
 import { createRoute, z } from "@hono/zod-openapi";
-import {
-  ErrorResponseSchema,
-  StampListResponseSchema,
-  UserIdResponseSchema,
-} from "@/schemas";
+import { ErrorResponseSchema, StampListResponseSchema, UserIdResponseSchema } from "@/schemas";
 
 export const createUserRoute = createRoute({
   method: "post",
@@ -37,9 +33,7 @@ export const getMyStampsRoute = createRoute({
   summary: "現在のユーザーが持つスタンプを取得する",
   request: {
     headers: z.object({
-      "x-user-id": z
-        .uuid()
-        .openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
+      "x-user-id": z.uuid().openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
     }),
   },
   responses: {

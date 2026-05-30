@@ -15,11 +15,7 @@ const STAMPS_BUCKET = "stamps";
 app.openapi(createUserRoute, async (c) => {
   const supabaseAdmin = getSupabaseAdmin();
 
-  const { data, error } = await supabaseAdmin
-    .from("users")
-    .insert({})
-    .select("id")
-    .single();
+  const { data, error } = await supabaseAdmin.from("users").insert({}).select("id").single();
 
   if (error || !data) {
     console.log(error, data);
@@ -76,17 +72,11 @@ app.openapi(createBoothRoute, async (c) => {
     return c.json({ message: "スタンプ画像が見つかりません" }, 400);
   }
 
-  if (
-    typeof title !== "string" ||
-    typeof room !== "string" ||
-    typeof stallholder !== "string"
-  ) {
+  if (typeof title !== "string" || typeof room !== "string" || typeof stallholder !== "string") {
     return c.json({ message: "必須項目が不足しています" }, 400);
   }
 
-  const extension = file.name.includes(".")
-    ? file.name.slice(file.name.lastIndexOf("."))
-    : "";
+  const extension = file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")) : "";
   const filePath = `booths/${crypto.randomUUID()}${extension}`;
 
   const supabaseAdmin = getSupabaseAdmin();
@@ -101,9 +91,7 @@ app.openapi(createBoothRoute, async (c) => {
     return c.json({ message: "スタンプのアップロードに失敗しました" }, 500);
   }
 
-  const { data: publicUrlData } = supabaseAdmin.storage
-    .from(STAMPS_BUCKET)
-    .getPublicUrl(filePath);
+  const { data: publicUrlData } = supabaseAdmin.storage.from(STAMPS_BUCKET).getPublicUrl(filePath);
 
   const { data, error } = await supabaseAdmin
     .from("booths")
@@ -164,11 +152,13 @@ app.openapi(createScanRoute, async (c) => {
 
     if (elapsedSeconds < 300) {
       const remainingSeconds = 300 - elapsedSeconds;
-      const remainingMinutes = Math.ceil(remainingSeconds / 60);
-      return c.json(
-        { message: `あと${remainingMinutes}分お待ちください` },
-        429,
-      );
+
+      if (remainingSeconds < 60) {
+        return c.json({ message: `あと${remainingSeconds}秒お待ちください` }, 429);
+      } else {
+        const remainingMinutes = Math.ceil(remainingSeconds / 60);
+        return c.json({ message: `あと${remainingMinutes}分お待ちください` }, 429);
+      }
     }
   }
 

@@ -1,9 +1,5 @@
 import { createRoute } from "@hono/zod-openapi";
-import {
-  ErrorResponseSchema,
-  ScanCreateRequestSchema,
-  ScanResponseSchema,
-} from "@/schemas";
+import { ErrorResponseSchema, ScanCreateRequestSchema, ScanResponseSchema } from "@/schemas";
 
 export const createScanRoute = createRoute({
   method: "post",

@@ -15,17 +15,13 @@ export const BoothSchema = z.object({
 
 export const ScanLogSchema = z.object({
   id: z.number().int().openapi({ example: 1 }),
-  user_id: z
-    .uuid()
-    .openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
+  user_id: z.uuid().openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
   booth_id: z.number().int().openapi({ example: 1 }),
   scanned_at: z.iso.datetime().openapi({ example: "2026-05-29T12:34:56.000Z" }),
 });
 
 export const UserIdResponseSchema = z.object({
-  user_id: z
-    .uuid()
-    .openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
+  user_id: z.uuid().openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
 });
 
 export const BoothListResponseSchema = z.object({
@@ -36,17 +32,8 @@ export const StampListResponseSchema = z.object({
   stamps: z.array(BoothSchema),
 });
 
-export const BoothCreateRequestSchema = z.object({
-  stamp_url: z.url().openapi({ example: "https://example.com/stamp.png" }),
-  title: z.string().openapi({ example: "焼きそば" }),
-  room: z.string().openapi({ example: "101教室" }),
-  stallholder: z.string().openapi({ example: "1-A" }),
-});
-
 export const ScanCreateRequestSchema = z.object({
-  user_id: z
-    .uuid()
-    .openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
+  user_id: z.uuid().openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
   booth_id: z.number().int().openapi({ example: 1 }),
 });
 
@@ -56,9 +43,7 @@ export const ScanResponseSchema = z.object({
 });
 
 export const BoothStampUploadResponseSchema = z.object({
-  stamp_url: z
-    .string()
-    .openapi({ example: "https://example.com/stamps/abc.png" }),
+  stamp_url: z.string().openapi({ example: "https://example.com/stamps/abc.png" }),
 });
 
 export const ErrorResponseSchema = z.object({
@@ -71,10 +56,7 @@ export type ScanLog = z.infer<typeof ScanLogSchema>;
 export type UserIdResponse = z.infer<typeof UserIdResponseSchema>;
 export type BoothListResponse = z.infer<typeof BoothListResponseSchema>;
 export type StampListResponse = z.infer<typeof StampListResponseSchema>;
-export type BoothCreateRequest = z.infer<typeof BoothCreateRequestSchema>;
 export type ScanCreateRequest = z.infer<typeof ScanCreateRequestSchema>;
 export type ScanResponse = z.infer<typeof ScanResponseSchema>;
-export type BoothStampUploadResponse = z.infer<
-  typeof BoothStampUploadResponseSchema
->;
+export type BoothStampUploadResponse = z.infer<typeof BoothStampUploadResponseSchema>;
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
