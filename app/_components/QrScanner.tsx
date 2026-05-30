@@ -3,13 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 
-type ScanStatus = "idle" | "loading" | "success" | "error";
+type ScanStatus = "idle" | "loading";
+
+const FIXED_USER_ID = "34687da4-c380-4a26-a728-ee85c330bdf0";
 
 export const QrScanner = () => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [scanStatus, setScanStatus] = useState<ScanStatus>("idle");
-  const [message, setMessage] = useState<string>("");
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const isProcessingRef = useRef(false);
@@ -17,7 +19,6 @@ export const QrScanner = () => {
   const startScanner = async () => {
     setIsCameraOpen(true);
     setScanStatus("idle");
-    setMessage("");
     isProcessingRef.current = false;
 
     setTimeout(async () => {
@@ -37,8 +38,7 @@ export const QrScanner = () => {
       } catch (err) {
         console.error("カメラ起動エラー:", err);
         setIsCameraOpen(false);
-        setScanStatus("error");
-        setMessage("カメラの起動に失敗しました。権限設定を確認してください。");
+        toast.error("カメラの起動に失敗しました。権限設定を確認してください。");
       }
     }, 100);
   };
@@ -56,31 +56,41 @@ export const QrScanner = () => {
     isProcessingRef.current = true;
 
     if (scannerRef.current && scannerRef.current.isScanning) {
-      await scannerRef.current.pause(true);
+      scannerRef.current.pause(true);
     }
     setScanStatus("loading");
-    setMessage("スタンプを確認中...");
 
     try {
+      let boothId: string | null = null;
+      try {
+        const url = new URL(decodedText);
+        boothId = url.searchParams.get("id");
+      } catch {
+        throw new Error("QRコードの読み取りに失敗しました");
+      }
+
+      if (!boothId) {
+        throw new Error("無効なQRコードです");
+      }
+
       const res = await fetch("/api/scans", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: decodedText }),
+        body: JSON.stringify({ user_id: FIXED_USER_ID, booth_id: boothId }),
       });
       const data = await res.json();
 
       await stopScanner();
       if (res.ok) {
-        setScanStatus("success");
-        setMessage(`🎉 スタンプを獲得しました！`);
+        toast.success("🎉 スタンプを獲得しました！");
       } else {
-        setScanStatus("error");
-        setMessage(`❌ ${data.message || "エラーが発生しました"}`);
+        toast.error(`❌ ${data.message || "エラーが発生しました"}`);
       }
-    } catch {
+    } catch (err) {
       await stopScanner();
-      setScanStatus("error");
-      setMessage("通信エラーが発生しました。");
+      toast.error(`❌ ${err instanceof Error ? err.message : "通信エラーが発生しました。"}`);
+    } finally {
+      setScanStatus("idle");
     }
   };
 
@@ -95,21 +105,12 @@ export const QrScanner = () => {
   return (
     <div className="w-full">
       {!isCameraOpen && (
-        <div className="space-y-4">
-          <button
-            onClick={startScanner}
-            className="btn btn-primary btn-lg w-full rounded-full shadow-lg"
-          >
-            📷 カメラを起動してスタンプGET
-          </button>
-          {scanStatus !== "idle" && (
-            <div
-              className={`alert ${scanStatus === "success" ? "alert-success" : "alert-error"} shadow-md`}
-            >
-              <span>{message}</span>
-            </div>
-          )}
-        </div>
+        <button
+          onClick={startScanner}
+          className="btn btn-primary btn-lg w-full rounded-full shadow-lg"
+        >
+          📷 カメラを起動してスタンプGET
+        </button>
       )}
 
       {isCameraOpen && (

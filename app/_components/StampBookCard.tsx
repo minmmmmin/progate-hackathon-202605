@@ -14,7 +14,7 @@ import type { ComponentType, SVGProps } from "react";
 import { Card } from "./ui/Card";
 import { PillButton } from "./ui/PillButton";
 import { StampCircle, type StampTone } from "./ui/StampCircle";
-import QrScanner from "./QrScanner";
+import { QrScanner } from "./QrScanner";
 
 type IconType = ComponentType<SVGProps<SVGSVGElement>>;
 
