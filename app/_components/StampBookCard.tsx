@@ -4,11 +4,12 @@ import { ChevronRight, Flag, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchBooths, fetchStamps } from "@/lib/stamps";
-import { getOrCreateUserId } from "@/lib/user";
+
 import type { Booth } from "@/schemas";
 import { Card } from "./ui/Card";
 import { PillButton } from "./ui/PillButton";
 import { StampCircle, type StampTone } from "./ui/StampCircle";
+import { useUserId } from "../_hooks/useUserId";
 
 const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"];
 
@@ -16,12 +17,14 @@ export function StampBookCard() {
   const [booths, setBooths] = useState<Booth[]>([]);
   const [collectedStamps, setCollectedStamps] = useState<Booth[]>([]);
   const [loading, setLoading] = useState(true);
+  const { userId } = useUserId();
 
   useEffect(() => {
+    if (!userId) return;
+    const id = userId;
     async function init() {
       try {
-        const userId = await getOrCreateUserId();
-        const [allBooths, myStamps] = await Promise.all([fetchBooths(), fetchStamps(userId)]);
+        const [allBooths, myStamps] = await Promise.all([fetchBooths(), fetchStamps(id)]);
         setBooths(allBooths);
         setCollectedStamps(myStamps);
       } catch (e) {
@@ -31,7 +34,7 @@ export function StampBookCard() {
       }
     }
     init();
-  }, []);
+  }, [userId]);
 
   const collectedIds = new Set(collectedStamps.map((s) => s.id));
   const displayBooths = booths.slice(0, 10); // トップページには最大10個表示

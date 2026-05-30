@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ComponentType, SVGProps } from "react";
 import { fetchBooths, fetchStamps } from "@/lib/stamps";
-import { getOrCreateUserId } from "@/lib/user";
+import { useUserId } from "../_hooks/useUserId";
 
 type NavItem = {
   label: string;
@@ -23,18 +23,21 @@ export function Sidebar() {
   const pathname = usePathname();
   const [counts, setCounts] = useState({ collected: 0, total: 0 });
 
+  const { userId } = useUserId();
+
   useEffect(() => {
+    if (!userId) return;
+    const id = userId;
     async function init() {
       try {
-        const userId = await getOrCreateUserId();
-        const [allBooths, myStamps] = await Promise.all([fetchBooths(), fetchStamps(userId)]);
+        const [allBooths, myStamps] = await Promise.all([fetchBooths(), fetchStamps(id)]);
         setCounts({ collected: myStamps.length, total: allBooths.length });
       } catch (e) {
         console.error(e);
       }
     }
     init();
-  }, []);
+  }, [userId]);
 
   return (
     <aside className="bg-base-200 flex h-full w-72 max-w-[80vw] flex-col gap-5 p-5 lg:w-full lg:max-w-none lg:bg-transparent lg:p-0">

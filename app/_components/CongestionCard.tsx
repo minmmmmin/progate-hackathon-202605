@@ -3,8 +3,8 @@
 import { ChevronRight, RefreshCw, Sparkles, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { fetchStamps } from "@/lib/stamps";
-import { getOrCreateUserId } from "@/lib/user";
 import { Card } from "./ui/Card";
+import { useUserId } from "../_hooks/useUserId";
 
 type Zone = {
   label: string;
@@ -63,18 +63,21 @@ const zonePill: Record<Zone["tone"], string> = {
 export function CongestionCard() {
   const [stampCount, setStampCount] = useState<number>(0);
 
+  const { userId } = useUserId();
+
   useEffect(() => {
+    if (!userId) return;
+    const id = userId;
     async function init() {
       try {
-        const userId = await getOrCreateUserId();
-        const myStamps = await fetchStamps(userId);
+        const myStamps = await fetchStamps(id);
         setStampCount(myStamps.length);
       } catch (e) {
         console.error(e);
       }
     }
     init();
-  }, []);
+  }, [userId]);
 
   return (
     <Card

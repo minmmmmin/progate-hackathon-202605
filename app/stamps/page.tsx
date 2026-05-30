@@ -4,13 +4,13 @@ import { BookOpenCheck, ChevronLeft, Loader2, MapPin, User, X } from "lucide-rea
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchBooths, fetchStamps } from "@/lib/stamps";
-import { getOrCreateUserId } from "@/lib/user";
 import type { Booth } from "@/schemas";
 import { Sidebar } from "../_components/Sidebar";
 import { TopBar } from "../_components/TopBar";
 import { Card } from "../_components/ui/Card";
 import { PillButton } from "../_components/ui/PillButton";
 import { StampCircle, type StampTone } from "../_components/ui/StampCircle";
+import { useUserId } from "../_hooks/useUserId";
 
 const DRAWER_ID = "main-drawer";
 const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"];
@@ -24,12 +24,14 @@ export default function StampsPage() {
     collected?: Booth;
     tone: StampTone;
   } | null>(null);
+  const { userId } = useUserId();
 
   useEffect(() => {
+    if (!userId) return;
+    const id = userId;
     async function init() {
       try {
-        const userId = await getOrCreateUserId();
-        const [allBooths, myStamps] = await Promise.all([fetchBooths(), fetchStamps(userId)]);
+        const [allBooths, myStamps] = await Promise.all([fetchBooths(), fetchStamps(id)]);
         setBooths(allBooths);
         setCollectedStamps(myStamps);
       } catch (e) {
@@ -39,7 +41,7 @@ export default function StampsPage() {
       }
     }
     init();
-  }, []);
+  }, [userId]);
 
   const collectedMap = new Map(collectedStamps.map((s) => [s.id, s]));
 
