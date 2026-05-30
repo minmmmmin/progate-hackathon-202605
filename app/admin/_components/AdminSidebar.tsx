@@ -12,6 +12,7 @@ import {
   Send,
   Users,
 } from "lucide-react";
+import Link from "next/link";
 import type { ComponentType, SVGProps } from "react";
 
 type NavItem = {
@@ -31,8 +32,14 @@ const navItems: NavItem[] = [
   { label: "設定", Icon: Settings },
 ];
 
-const quickActions = [
-  { label: "スポットを追加", Icon: Plus },
+type QuickAction = {
+  label: string;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
+  href?: string;
+};
+
+const quickActions: QuickAction[] = [
+  { label: "スポットを追加", Icon: Plus, href: "/admin/spots/new" },
   { label: "QRコードを一括生成", Icon: QrCode },
   { label: "混雑状況を一括更新", Icon: RefreshCw },
   { label: "お知らせを投稿", Icon: Send },
@@ -71,16 +78,21 @@ export function AdminSidebar() {
       <div className="bg-base-100 rounded-3xl p-4 shadow-sm">
         <div className="text-primary mb-3 text-xs font-bold">クイックアクション</div>
         <div className="flex flex-col gap-2">
-          {quickActions.map(({ label, Icon }) => (
-            <button
-              key={label}
-              type="button"
-              className="btn btn-sm btn-outline btn-primary bg-base-100 justify-start rounded-2xl font-semibold"
-            >
-              <Icon className="h-4 w-4" />
-              <span className="text-xs">{label}</span>
-            </button>
-          ))}
+          {quickActions.map(({ label, Icon, href }) => {
+            const className =
+              "btn btn-sm btn-outline btn-primary bg-base-100 justify-start rounded-2xl font-semibold";
+            return href ? (
+              <Link key={label} href={href} className={className}>
+                <Icon className="h-4 w-4" />
+                <span className="text-xs">{label}</span>
+              </Link>
+            ) : (
+              <button key={label} type="button" className={className}>
+                <Icon className="h-4 w-4" />
+                <span className="text-xs">{label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </aside>
