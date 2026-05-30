@@ -9,6 +9,7 @@ import {
   Plus,
   UtensilsCrossed,
 } from "lucide-react";
+import Link from "next/link";
 import { useState, type ComponentType, type SVGProps } from "react";
 import { Card } from "../../_components/ui/Card";
 import { QrCodeDialog } from "./QrCodeDialog";
@@ -88,13 +89,13 @@ export function SpotListCard() {
         icon={<Bookmark className="h-5 w-5" />}
         title="スポット一覧"
         trailing={
-          <button
-            type="button"
+          <Link
+            href="/admin/spots/new"
             className="text-primary inline-flex items-center gap-1 text-sm font-bold"
           >
             <Plus className="h-4 w-4" />
             スポットを追加
-          </button>
+          </Link>
         }
       >
         <div className="overflow-x-auto">
