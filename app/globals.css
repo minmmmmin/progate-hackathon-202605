@@ -8,6 +8,9 @@
   default: true;
   prefersdark: false;
   color-scheme: light;
+
+  --color-primary: #ff7aa2;
+  --color-primary-content: #ffffff;
 }
 
 @theme inline {
