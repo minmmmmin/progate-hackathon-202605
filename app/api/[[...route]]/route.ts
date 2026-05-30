@@ -61,9 +61,7 @@ app.openapi(getBoothsRoute, async (c) => {
   }
 
   // 直近のスキャン数をブースごとに集計
-  const since = new Date(
-    Date.now() - CONGESTION_WINDOW_MINUTES * 60 * 1000,
-  ).toISOString();
+  const since = new Date(Date.now() - CONGESTION_WINDOW_MINUTES * 60 * 1000).toISOString();
 
   const { data: scanLogs, error: scanError } = await supabase
     .from("scan_logs")
