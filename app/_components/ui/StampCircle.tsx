@@ -7,12 +7,12 @@ type StampCircleProps =
   | { state: "locked"; label: string };
 
 const toneClass: Record<StampTone, string> = {
-  pink: "bg-stamp-pink text-festival-pink-deep",
-  peach: "bg-stamp-peach text-amber-700",
-  mint: "bg-stamp-mint text-emerald-700",
-  sky: "bg-stamp-sky text-sky-700",
-  lemon: "bg-stamp-lemon text-yellow-700",
-  lavender: "bg-stamp-lavender text-violet-700",
+  pink: "bg-pink-100 text-pink-700",
+  peach: "bg-orange-100 text-amber-700",
+  mint: "bg-emerald-100 text-emerald-700",
+  sky: "bg-sky-100 text-sky-700",
+  lemon: "bg-yellow-100 text-yellow-700",
+  lavender: "bg-violet-100 text-violet-700",
 };
 
 export function StampCircle(props: StampCircleProps) {

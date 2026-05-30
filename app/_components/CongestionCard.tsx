@@ -42,10 +42,10 @@ const zones: Zone[] = [
 ];
 
 const zoneBg: Record<Zone["tone"], string> = {
-  green: "bg-status-green-soft",
-  yellow: "bg-status-yellow-soft",
-  red: "bg-status-red-soft",
-  blue: "bg-status-blue-soft",
+  green: "bg-success/20",
+  yellow: "bg-warning/20",
+  red: "bg-error/20",
+  blue: "bg-info/20",
 };
 
 const zonePill: Record<Zone["tone"], string> = {
