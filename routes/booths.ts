@@ -1,5 +1,5 @@
 import { createRoute } from "@hono/zod-openapi";
-import { BoothListResponseSchema, BoothSchema, ErrorResponseSchema } from "@/schemas";
+import { BoothListWithCongestionResponseSchema, BoothSchema, ErrorResponseSchema } from "@/schemas";
 
 export const getBoothsRoute = createRoute({
   method: "get",
@@ -11,7 +11,7 @@ export const getBoothsRoute = createRoute({
       description: "ブース一覧の取得成功",
       content: {
         "application/json": {
-          schema: BoothListResponseSchema,
+          schema: BoothListWithCongestionResponseSchema,
         },
       },
     },
