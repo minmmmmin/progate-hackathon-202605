@@ -1,22 +1,30 @@
 "use client";
 
-import { Copy, Download, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import QRCode from "react-qr-code";
+import { Download, X } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { FC, useEffect, useRef, useState } from "react";
+
+import { BASE_URL } from "../../../constants/url";
 
 type QrCodeDialogProps = {
   open: boolean;
   onClose: () => void;
   spotId: string;
   spotName: string;
+  stampURL: string;
 };
 
 const EXPORT_SIZE = 1024;
 
-export function QrCodeDialog({ open, onClose, spotId, spotName }: QrCodeDialogProps) {
+export const QrCodeDialog: FC<QrCodeDialogProps> = ({
+  open,
+  onClose,
+  spotId,
+  spotName,
+  stampURL,
+}) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const qrRef = useRef<HTMLDivElement>(null);
-  const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -26,16 +34,9 @@ export function QrCodeDialog({ open, onClose, spotId, spotName }: QrCodeDialogPr
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
-  const stampUrl = spotId
-    ? `https://stamp-rally.example.com/stamp/${encodeURIComponent(spotId)}`
-    : "";
+  const params = new URLSearchParams({ id: spotId });
 
-  async function copyUrl() {
-    if (!stampUrl) return;
-    await navigator.clipboard.writeText(stampUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  }
+  const qrURL = `${BASE_URL}?${params.toString()}`;
 
   async function saveAsImage() {
     const svg = qrRef.current?.querySelector("svg");
@@ -66,6 +67,10 @@ export function QrCodeDialog({ open, onClose, spotId, spotName }: QrCodeDialogPr
     }
   }
 
+  if (!open) {
+    return null;
+  }
+
   return (
     <dialog ref={dialogRef} className="modal" onClose={onClose} onCancel={onClose}>
       <div className="modal-box bg-base-100 max-w-sm rounded-3xl">
@@ -86,9 +91,22 @@ export function QrCodeDialog({ open, onClose, spotId, spotName }: QrCodeDialogPr
 
         <div className="bg-base-200 flex flex-col items-center gap-3 rounded-2xl p-5">
           <div ref={qrRef} className="bg-base-100 rounded-2xl p-4">
-            {stampUrl && <QRCode value={stampUrl} size={200} bgColor="#ffffff" fgColor="#3d2a35" />}
+            {qrURL && (
+              <QRCodeSVG
+                value={qrURL}
+                size={256}
+                level="H"
+                bgColor="#ffffff"
+                fgColor="#3d2a35"
+                imageSettings={{
+                  src: stampURL,
+                  height: 80,
+                  width: 80,
+                  excavate: true,
+                }}
+              />
+            )}
           </div>
-          <p className="text-base-content/60 text-center text-[11px] break-all">{stampUrl}</p>
         </div>
 
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
@@ -96,18 +114,10 @@ export function QrCodeDialog({ open, onClose, spotId, spotName }: QrCodeDialogPr
             type="button"
             className="btn btn-primary flex-1 rounded-full font-semibold"
             onClick={saveAsImage}
-            disabled={saving || !stampUrl}
+            disabled={saving || !qrURL}
           >
             <Download className="h-4 w-4" />
             {saving ? "保存中…" : "写真に保存"}
-          </button>
-          <button
-            type="button"
-            className="btn btn-outline btn-primary bg-base-100 flex-1 rounded-full font-semibold"
-            onClick={copyUrl}
-          >
-            <Copy className="h-4 w-4" />
-            {copied ? "コピーしました" : "URLをコピー"}
           </button>
         </div>
       </div>
@@ -116,9 +126,9 @@ export function QrCodeDialog({ open, onClose, spotId, spotName }: QrCodeDialogPr
       </form>
     </dialog>
   );
-}
+};
 
-function svgToPngBlob(svg: SVGElement, size: number): Promise<Blob> {
+const svgToPngBlob = (svg: SVGElement, size: number): Promise<Blob> => {
   const clone = svg.cloneNode(true) as SVGElement;
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
   clone.setAttribute("width", String(size));
@@ -154,9 +164,9 @@ function svgToPngBlob(svg: SVGElement, size: number): Promise<Blob> {
     };
     img.src = svgUrl;
   });
-}
+};
 
-function downloadBlob(blob: Blob, filename: string) {
+const downloadBlob = (blob: Blob, filename: string) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -165,8 +175,8 @@ function downloadBlob(blob: Blob, filename: string) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
+};
 
-function sanitize(name: string) {
+const sanitize = (name: string) => {
   return name.replace(/[\\/:*?"<>|\s]+/g, "_");
-}
+};

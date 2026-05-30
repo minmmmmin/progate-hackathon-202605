@@ -11,17 +11,20 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "daisyui": "^5.5.20",
-    "lucide-react": "^1.17.0",
     "@hono/zod-openapi": "^1.4.0",
     "@scalar/hono-api-reference": "^0.10.19",
     "@supabase/supabase-js": "^2.106.2",
+    "daisyui": "^5.5.20",
     "hono": "^4.12.23",
+    "html5-qrcode": "^2.3.8",
+    "lucide-react": "^1.17.0",
     "next": "16.2.6",
+    "qrcode.react": "^4.2.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-qr-code": "^2.0.21",
     "react-use": "^17.6.0",
+    "swr": "^2.4.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {

@@ -7,16 +7,18 @@ type CardProps = {
   children: ReactNode;
   className?: string;
   bodyClassName?: string;
+  loading?: boolean;
 };
 
-export function Card({
+export const Card = ({
   title,
   icon,
   trailing,
   children,
   className = "",
   bodyClassName = "",
-}: CardProps) {
+  loading = false,
+}: CardProps) => {
   return (
     <section className={`card bg-base-100 shadow-sm ${className}`}>
       <div className={`card-body p-5 sm:p-6 ${bodyClassName}`}>
@@ -29,8 +31,14 @@ export function Card({
             {trailing && <div className="text-base-content/60 text-xs sm:text-sm">{trailing}</div>}
           </header>
         )}
-        {children}
+        {loading ? (
+          <div className="flex w-full justify-center py-10">
+            <span className="loading loading-spinner loading-md text-primary"></span>
+          </div>
+        ) : (
+          children
+        )}
       </div>
     </section>
   );
-}
+};

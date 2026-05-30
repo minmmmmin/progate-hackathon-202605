@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Cake,
   Camera,
@@ -12,6 +14,7 @@ import type { ComponentType, SVGProps } from "react";
 import { Card } from "./ui/Card";
 import { PillButton } from "./ui/PillButton";
 import { StampCircle, type StampTone } from "./ui/StampCircle";
+import QrScanner from "./QrScanner";
 
 type IconType = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -63,6 +66,9 @@ export function StampBookCard() {
         <PillButton variant="outline" trailing={<ChevronRight className="h-4 w-4" />}>
           スタンプ帳をもっとみる！
         </PillButton>
+      </div>
+      <div className="mt-4">
+        <QrScanner />
       </div>
     </Card>
   );
