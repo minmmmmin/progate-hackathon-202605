@@ -1,4 +1,9 @@
+"use client";
+
 import { ChevronRight, RefreshCw, Sparkles, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { fetchStamps } from "@/lib/stamps";
+import { getOrCreateUserId } from "@/lib/user";
 import { Card } from "./ui/Card";
 
 type Zone = {
@@ -56,6 +61,21 @@ const zonePill: Record<Zone["tone"], string> = {
 };
 
 export function CongestionCard() {
+  const [stampCount, setStampCount] = useState<number>(0);
+
+  useEffect(() => {
+    async function init() {
+      try {
+        const userId = await getOrCreateUserId();
+        const myStamps = await fetchStamps(userId);
+        setStampCount(myStamps.length);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    init();
+  }, []);
+
   return (
     <Card
       icon={<Users className="h-5 w-5" />}
@@ -71,7 +91,7 @@ export function CongestionCard() {
         <Sparkles className="text-primary h-4 w-4 shrink-0" />
         <span>
           あなたが集めた
-          <span className="text-primary mx-1 text-sm font-extrabold">7</span>
+          <span className="text-primary mx-1 text-sm font-extrabold">{stampCount}</span>
           個のスタンプが、会場の混雑データに反映されています
         </span>
       </div>
