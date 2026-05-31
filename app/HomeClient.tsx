@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CongestionCard } from "./_components/CongestionCard";
+import { CongestionTable } from "./_components/CongestionTable";
 import { RecommendedSpotsCard } from "./_components/RecommendedSpotsCard";
 import { Sidebar } from "./_components/Sidebar";
 import { StampBookCard } from "./_components/StampBookCard";
@@ -77,12 +78,13 @@ export function HomeClient() {
               <Sidebar refreshKey={stampRefreshKey} />
             </div>
 
-            <main className="grid auto-rows-min grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
+            <main className="grid auto-rows-min grid-cols-1 gap-5 sm:gap-6">
               <StampBookCard refreshKey={stampRefreshKey} />
-              <CongestionCard />
-              <div className="lg:col-span-2">
-                <RecommendedSpotsCard />
+              <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
+                <CongestionCard />
+                <CongestionTable />
               </div>
+              <RecommendedSpotsCard />
             </main>
           </div>
         </div>
