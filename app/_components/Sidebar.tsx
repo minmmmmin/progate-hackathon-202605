@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ComponentType, SVGProps } from "react";
 import { fetchBooths, fetchStamps } from "@/lib/stamps";
-import { useUserId } from "../_hooks/useUserId";
+import { useUserId } from "@/hooks/useUserId";
 
 type NavItem = {
   label: string;

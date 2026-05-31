@@ -9,7 +9,8 @@ import type { Booth } from "@/schemas";
 import { Card } from "./ui/Card";
 import { PillButton } from "./ui/PillButton";
 import { StampCircle, type StampTone } from "./ui/StampCircle";
-import { useUserId } from "../_hooks/useUserId";
+import { QrScanner } from "./QrScanner";
+import { useUserId } from "@/hooks/useUserId";
 
 const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"];
 
@@ -90,6 +91,9 @@ export function StampBookCard() {
           </Link>
         </div>
       )}
+      <div className="mt-4">
+        <QrScanner />
+      </div>
     </Card>
   );
 }

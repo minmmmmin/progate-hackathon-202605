@@ -10,14 +10,11 @@ type UseUserIdReturn = {
   error: Error | undefined;
 };
 
-// 同時にマウントされた複数コンポーネントから POST /api/users が重複発火しないよう、
-// モジュールスコープで in-flight Promise を共有する
 let inflight: Promise<string> | null = null;
 
 async function ensureUserId(): Promise<string> {
   const existing = localStorage.getItem(STORAGE_KEY);
   if (existing) {
-    // 旧実装 (useLocalStorage) が JSON エンコードして保存していた値を素の文字列に正規化
     const normalized = existing.startsWith('"') ? (JSON.parse(existing) as string) : existing;
     if (normalized !== existing) {
       localStorage.setItem(STORAGE_KEY, normalized);
@@ -44,7 +41,7 @@ async function ensureUserId(): Promise<string> {
   return inflight;
 }
 
-export function useUserId(): UseUserIdReturn {
+export const useUserId = (): UseUserIdReturn => {
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>();
@@ -70,4 +67,4 @@ export function useUserId(): UseUserIdReturn {
   }, []);
 
   return { userId, isLoading, error };
-}
+};

@@ -10,6 +10,7 @@ type PillButtonProps = {
   className?: string;
   size?: "sm" | "md";
   fullWidth?: boolean;
+  onClick?: () => void;
 };
 
 const variantClass: Record<Variant, string> = {
@@ -32,12 +33,14 @@ export function PillButton({
   className = "",
   size = "md",
   fullWidth = false,
+  onClick,
 }: PillButtonProps) {
   return (
     <span
       className={`btn rounded-full font-semibold ${sizeClass[size]} ${variantClass[variant]} ${
         fullWidth ? "w-full" : ""
       } ${className}`}
+      onClick={onClick}
     >
       {leading && <span className="inline-flex">{leading}</span>}
       <span>{children}</span>
