@@ -112,7 +112,7 @@ export function StampBookCard({ refreshKey = 0, onStampAcquired }: StampBookCard
             })}
       </div>
       {!loading && (
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 hidden justify-center lg:flex">
           <Link href="/stamps" className="w-full sm:w-auto">
             <PillButton
               variant="outline"
@@ -124,7 +124,7 @@ export function StampBookCard({ refreshKey = 0, onStampAcquired }: StampBookCard
           </Link>
         </div>
       )}
-      <div className="mt-4">
+      <div className="mt-4 hidden lg:block">
         <button
           type="button"
           onClick={() => openScanner({ onRegistered: onStampAcquired })}
