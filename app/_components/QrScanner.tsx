@@ -144,8 +144,12 @@ function QrScannerModal({
           { facingMode: "environment" },
           {
             fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0,
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+              const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+              const qrboxSize = Math.floor(minEdge * 0.65);
+
+              return { width: qrboxSize, height: qrboxSize };
+            },
           },
           handleScanSuccess,
           () => {},
@@ -183,7 +187,7 @@ function QrScannerModal({
         <p className="mb-6 text-center text-sm opacity-70">枠内にQRコードを合わせてください</p>
 
         <div className="bg-base-200 relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-3xl">
-          <div id="qr-video-container" className="h-full w-full" />
+          <div id="qr-video-container" className="qr-preview h-full w-full" />
           {scanStatus === "loading" && (
             <div className="bg-base-100/90 absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm">
               <span className="loading loading-spinner loading-lg text-primary"></span>
