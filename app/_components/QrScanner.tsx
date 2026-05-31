@@ -58,8 +58,9 @@ function QrScannerModal({ onClose }: { onClose: () => void }) {
   };
 
   useEffect(() => {
-    const html5QrCode = new Html5Qrcode("qr-video-container");
-    scannerRef.current = html5QrCode;
+    let cancelled = false;
+    let html5QrCode: Html5Qrcode | null = null;
+    let startPromise: Promise<unknown> = Promise.resolve();
     isProcessingRef.current = false;
 
     const handleScanSuccess = async (decodedText: string) => {
@@ -105,28 +106,44 @@ function QrScannerModal({ onClose }: { onClose: () => void }) {
       }
     };
 
-    html5QrCode
-      .start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-        },
-        handleScanSuccess,
-        () => {},
-      )
-      .catch((err) => {
-        console.error("カメラ起動エラー:", err);
-        onClose();
-        showError("カメラの起動に失敗しました。権限設定を確認してください。");
-      });
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      html5QrCode = new Html5Qrcode("qr-video-container");
+      scannerRef.current = html5QrCode;
+
+      startPromise = html5QrCode
+        .start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+          },
+          handleScanSuccess,
+          () => {},
+        )
+        .then(async () => {
+          if (cancelled && html5QrCode && html5QrCode.isScanning) {
+            await html5QrCode.stop().catch(console.error);
+          }
+        })
+        .catch((err) => {
+          if (cancelled) return;
+          console.error("カメラ起動エラー:", err);
+          onClose();
+          showError("カメラの起動に失敗しました。権限設定を確認してください。");
+        });
+    }, 100);
 
     return () => {
-      if (scannerRef.current && scannerRef.current.isScanning) {
-        scannerRef.current.stop().catch(console.error);
-      }
+      cancelled = true;
+      clearTimeout(timer);
       scannerRef.current = null;
+      startPromise.finally(() => {
+        if (html5QrCode && html5QrCode.isScanning) {
+          html5QrCode.stop().catch(console.error);
+        }
+      });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -138,10 +155,7 @@ function QrScannerModal({ onClose }: { onClose: () => void }) {
         <p className="mb-6 text-center text-sm opacity-70">枠内にQRコードを合わせてください</p>
 
         <div className="bg-base-200 relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-3xl">
-          <div
-            id="qr-video-container"
-            className="absolute inset-0 [&_video]:!absolute [&_video]:!inset-0 [&_video]:!h-full [&_video]:!w-full [&_video]:!object-cover"
-          />
+          <div id="qr-video-container" className="h-full w-full" />
           {scanStatus === "loading" && (
             <div className="bg-base-100/90 absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm">
               <span className="loading loading-spinner loading-lg text-primary"></span>
