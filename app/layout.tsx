@@ -18,6 +18,19 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "文化祭スタンプラリー",
   description: "スタンプを集めて素敵な景品をゲットしよう。",
+  openGraph: {
+    title: "文化祭スタンプラリー",
+    description: "スタンプを集めて素敵な景品をゲットしよう。",
+    images: ["/images/ogp.png"],
+    type: "website",
+    locale: "ja_JP",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "文化祭スタンプラリー",
+    description: "スタンプを集めて素敵な景品をゲットしよう。",
+    images: ["/images/ogp.png"],
+  },
 };
 
 export default function RootLayout({
