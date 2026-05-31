@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpenCheck, Home, Sparkles } from "lucide-react";
+import { BookOpenCheck, HelpCircle, Home, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,6 +17,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { label: "ホーム", Icon: Home, href: "/" },
   { label: "スタンプ帳", Icon: BookOpenCheck, href: "/stamps" },
+  { label: "使い方", Icon: HelpCircle, href: "/help" },
 ];
 
 export function Sidebar() {
