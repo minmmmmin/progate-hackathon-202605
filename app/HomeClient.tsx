@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/useToast";
 import { registerScan } from "@/lib/scanRegistration";
 import { invalidateStamps } from "@/lib/stamps";
 import type { Booth } from "@/schemas";
+import { CongestionTable } from "./_components/CongestionTable";
 
 const DRAWER_ID = "main-drawer";
 
@@ -82,13 +83,13 @@ export function HomeClient() {
             <div className="hidden lg:block">
               <Sidebar refreshKey={stampRefreshKey} />
             </div>
-
-            <main className="grid auto-rows-min grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
+            <main className="grid auto-rows-min grid-cols-1 gap-5 sm:gap-6">
               <StampBookCard refreshKey={stampRefreshKey} onStampAcquired={handleStampAcquired} />
-              <CongestionCard />
-              <div className="lg:col-span-2">
-                <RecommendedSpotsCard />
+              <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
+                <CongestionCard />
+                <CongestionTable />
               </div>
+              <RecommendedSpotsCard />
             </main>
           </div>
         </div>
