@@ -2,9 +2,9 @@
 
 import { BookOpenCheck, ChevronLeft, Loader2, MapPin, User, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { fetchBooths, fetchStamps } from "@/lib/stamps";
-import type { Booth } from "@/schemas";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { fetchBooths, fetchStamps, sortBooths, type SortMode } from "@/lib/stamps";
+import type { Booth, CollectedStamp } from "@/schemas";
 import { Sidebar } from "../_components/Sidebar";
 import { TopBar } from "../_components/TopBar";
 import { Card } from "../_components/ui/Card";
@@ -17,11 +17,12 @@ const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"]
 
 export default function StampsPage() {
   const [booths, setBooths] = useState<Booth[]>([]);
-  const [collectedStamps, setCollectedStamps] = useState<Booth[]>([]);
+  const [collectedStamps, setCollectedStamps] = useState<CollectedStamp[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortMode, setSortMode] = useState<SortMode>("class");
   const [selectedBooth, setSelectedBooth] = useState<{
     booth: Booth;
-    collected?: Booth;
+    collected?: CollectedStamp;
     tone: StampTone;
   } | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -54,7 +55,15 @@ export default function StampsPage() {
     init();
   }, [userId]);
 
-  const collectedMap = new Map(collectedStamps.map((s) => [s.id, s]));
+  const collectedMap = useMemo(
+    () => new Map(collectedStamps.map((s) => [s.id, s])),
+    [collectedStamps],
+  );
+
+  const sortedBooths = useMemo(
+    () => sortBooths(booths, collectedMap, sortMode),
+    [booths, collectedMap, sortMode],
+  );
 
   return (
     <div className="drawer bg-base-100 text-base-content min-h-screen">
@@ -95,6 +104,25 @@ export default function StampsPage() {
                   )
                 }
               >
+                <div role="tablist" className="tabs tabs-boxed bg-base-200/60 w-fit">
+                  <button
+                    type="button"
+                    role="tab"
+                    className={`tab ${sortMode === "class" ? "tab-active" : ""}`}
+                    onClick={() => setSortMode("class")}
+                  >
+                    クラス順
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    className={`tab ${sortMode === "acquired" ? "tab-active" : ""}`}
+                    onClick={() => setSortMode("acquired")}
+                  >
+                    入手順
+                  </button>
+                </div>
+
                 <div className="grid grid-cols-3 gap-x-2 gap-y-10 py-6 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
                   {loading
                     ? Array.from({ length: 12 }).map((_, i) => (
@@ -103,7 +131,7 @@ export default function StampsPage() {
                           <div className="bg-base-content/5 h-3 w-16 animate-pulse rounded" />
                         </div>
                       ))
-                    : booths.map((booth, idx) => {
+                    : sortedBooths.map((booth, idx) => {
                         const collected = collectedMap.get(booth.id);
                         const tone = tones[idx % tones.length];
                         return (
