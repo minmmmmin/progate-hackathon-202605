@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
 ];
 
 type SidebarProps = {
-  refreshKey?: number;
+  refreshKey?: number | string;
 };
 
 export function Sidebar({ refreshKey = 0 }: SidebarProps) {

@@ -45,7 +45,7 @@ export function StampCircle({ size = 20, ...props }: Props) {
             <img
               src={props.imageSrc}
               alt={props.label ?? ""}
-              className="h-[50%] w-[50%] object-contain"
+              className="h-[100%] w-[100%] object-contain"
             />
           ) : (
             props.icon

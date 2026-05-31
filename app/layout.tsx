@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { BottomTabBar } from "./_components/BottomTabBar";
+import { QrScannerProvider } from "./_components/QrScanner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,9 +27,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col pb-20 lg:pb-0">
         <Toaster position="top-center" richColors />
-        {children}
+        <QrScannerProvider>
+          {children}
+          <BottomTabBar />
+        </QrScannerProvider>
       </body>
     </html>
   );
