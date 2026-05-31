@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { Signal } from "lucide-react";
 import { Card } from "./ui/Card";
+import useSWR from "swr";
 
 type BoothWithCongestion = {
   id: string;
@@ -47,37 +47,22 @@ type CongestionTableProps = {
 };
 
 export function CongestionTable({ className = "" }: CongestionTableProps) {
-  const [booths, setBooths] = useState<BoothWithCongestion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const {
+    data: booths,
+    isLoading,
+    error,
+  } = useSWR(
+    "/api/booths",
+    async (url: string) => {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch booths");
+      const booths = (await res.json()) as Promise<{ booths: BoothWithCongestion[] }>;
+      return (await booths).booths;
+    },
+    { refreshInterval: 30000, revalidateOnFocus: true },
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-
-    fetch("/api/booths")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.json() as Promise<{ booths: BoothWithCongestion[] }>;
-      })
-      .then((data) => {
-        if (!cancelled) {
-          setBooths(data.booths ?? []);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setError(true);
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Card icon={<Signal className="h-5 w-5" />} title="混雑状況" className={className}>
         <div className="flex items-center justify-center py-8 text-sm text-gray-500">
@@ -99,32 +84,35 @@ export function CongestionTable({ className = "" }: CongestionTableProps) {
 
   return (
     <Card icon={<Signal className="h-5 w-5" />} title="混雑状況" className={className}>
-      <div className="space-y-2">
-        {booths.map((booth) => {
-          const { label, dotClass, bgClass } = getCongestionInfo(booth.congestion_score);
-          return (
-            <div
-              key={booth.id}
-              className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
-            >
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="text-sm font-medium">{booth.title}</p>
-                  <p className="text-xs text-gray-500">{booth.room}</p>
-                </div>
-              </div>
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${bgClass}`}
+      {booths ? (
+        <div className="space-y-2">
+          {booths.map((booth) => {
+            const { label, dotClass, bgClass } = getCongestionInfo(booth.congestion_score);
+            return (
+              <div
+                key={booth.id}
+                className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
               >
-                <span className={`h-2 w-2 rounded-full ${dotClass}`} />
-                {label}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {booths.length === 0 && (
+                <div className="flex items-center gap-3">
+                  <div>
+                    <p className="text-sm font-medium">{booth.title}</p>
+                    <p className="text-xs text-gray-500">{booth.room}</p>
+                  </div>
+                </div>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${bgClass}`}
+                >
+                  <span className={`h-2 w-2 rounded-full ${dotClass}`} />
+                  {label}
+                </span>
+              </div>
+            );
+          })}
+          {booths.length === 0 && (
+            <p className="py-4 text-center text-sm text-gray-500">表示するブースがありません</p>
+          )}
+        </div>
+      ) : (
         <p className="py-4 text-center text-sm text-gray-500">表示するブースがありません</p>
       )}
     </Card>

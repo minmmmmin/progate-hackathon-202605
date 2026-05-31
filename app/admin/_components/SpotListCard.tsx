@@ -15,13 +15,17 @@ export const SpotListCard = () => {
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [printingAll, setPrintingAll] = useState(false);
 
-  const { data: spots, isLoading } = useSWR<Booth[]>("/api/booths", async (url: string) => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch spots");
+  const { data: spots, isLoading } = useSWR<Booth[]>(
+    "/api/booths",
+    async (url: string) => {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch spots");
 
-    const json = await res.json();
-    return json.booths;
-  });
+      const json = await res.json();
+      return json.booths;
+    },
+    { refreshInterval: 30000, revalidateOnFocus: true },
+  );
 
   const bulkTargets =
     spots?.map((spot) => ({
