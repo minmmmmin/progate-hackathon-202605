@@ -1,12 +1,17 @@
+"use client";
+
 import { CongestionCard } from "./_components/CongestionCard";
 import { RecommendedSpotsCard } from "./_components/RecommendedSpotsCard";
 import { Sidebar } from "./_components/Sidebar";
 import { StampBookCard } from "./_components/StampBookCard";
 import { TopBar } from "./_components/TopBar";
+import { useUserId } from "../hooks/useUserId";
 
 const DRAWER_ID = "main-drawer";
 
 export default function Home() {
+  useUserId();
+
   return (
     <div className="drawer bg-base-100 text-base-content min-h-screen">
       <input id={DRAWER_ID} type="checkbox" className="drawer-toggle" />

@@ -5,11 +5,14 @@ import { getSupabaseAdmin, supabase } from "@/lib/supabase";
 import { createBoothRoute, getBoothsRoute } from "@/routes/booths";
 import { createScanRoute } from "@/routes/scans";
 import { createUserRoute, getMyStampsRoute } from "@/routes/users";
-import type { Booth } from "@/schemas";
+import type { Booth, CollectedStamp } from "@/schemas";
 
 const app = new OpenAPIHono().basePath("/api");
 
 const STAMPS_BUCKET = "stamps";
+
+// 混雑状況の算出に使う直近の時間範囲（分）
+const CONGESTION_WINDOW_MINUTES = 120;
 
 // ユーザー作成
 app.openapi(createUserRoute, async (c) => {
@@ -31,22 +34,23 @@ app.openapi(getMyStampsRoute, async (c) => {
 
   const { data, error } = await supabase
     .from("scan_logs")
-    .select("booth:booths ( id, stamp_url, title, room, stallholder )")
-    .eq("user_id", userId);
+    .select("scanned_at, booth:booths ( id, stamp_url, title, room, stallholder )")
+    .eq("user_id", userId)
+    .order("scanned_at", { ascending: true });
 
   if (error) {
     return c.json({ message: "スタンプ取得に失敗しました" }, 500);
   }
 
-  const uniqueBooths = new Map<string, Booth>();
+  const uniqueStamps = new Map<string, CollectedStamp>();
   for (const row of data ?? []) {
-    const booth = Array.isArray(row.booth) ? row.booth[0] : row.booth;
-    if (booth && !uniqueBooths.has(booth.id)) {
-      uniqueBooths.set(booth.id, booth);
+    const booth = Array.isArray(row.booth) ? row.booth[0] : (row.booth as Booth | null);
+    if (booth && !uniqueStamps.has(booth.id)) {
+      uniqueStamps.set(booth.id, { ...booth, acquired_at: row.scanned_at });
     }
   }
 
-  return c.json({ stamps: Array.from(uniqueBooths.values()) }, 200);
+  return c.json({ stamps: Array.from(uniqueStamps.values()) }, 200);
 });
 
 // ブース一覧取得
@@ -57,7 +61,29 @@ app.openapi(getBoothsRoute, async (c) => {
     return c.json({ message: "ブース取得に失敗しました" }, 500);
   }
 
-  return c.json({ booths: data }, 200);
+  // 直近のスキャン数をブースごとに集計
+  const since = new Date(Date.now() - CONGESTION_WINDOW_MINUTES * 60 * 1000).toISOString();
+
+  const { data: scanLogs, error: scanError } = await supabase
+    .from("scan_logs")
+    .select("booth_id")
+    .gte("scanned_at", since);
+
+  if (scanError) {
+    return c.json({ message: "スキャン履歴の取得に失敗しました" }, 500);
+  }
+
+  const congestionMap = new Map<string, number>();
+  for (const log of scanLogs ?? []) {
+    congestionMap.set(log.booth_id, (congestionMap.get(log.booth_id) ?? 0) + 1);
+  }
+
+  const boothsWithCongestion = (data ?? []).map((booth) => ({
+    ...booth,
+    congestion_score: congestionMap.get(booth.id) ?? 0,
+  }));
+
+  return c.json({ booths: boothsWithCongestion }, 200);
 });
 
 // ブース登録＆スタンプ画像アップロード
