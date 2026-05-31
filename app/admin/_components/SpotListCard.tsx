@@ -1,16 +1,19 @@
 "use client";
 
-import { Bookmark, MoreHorizontal, Plus } from "lucide-react";
+import { Bookmark, Download, MoreHorizontal, Plus, Printer } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Card } from "../../_components/ui/Card";
 import useSWR from "swr";
-import { QrCodeDialog } from "./QrCodeDialog";
 import Image from "next/image";
 import { Booth } from "@/schemas";
+import { QrCodeDialog } from "./QrCodeDialog";
+import { downloadPostersBulk, printPostersBulk } from "./qrPosterUtils";
 
 export const SpotListCard = () => {
   const [qrSpot, setQrSpot] = useState<Booth | null>(null);
+  const [downloadingAll, setDownloadingAll] = useState(false);
+  const [printingAll, setPrintingAll] = useState(false);
 
   const { data: spots, isLoading } = useSWR<Booth[]>("/api/booths", async (url: string) => {
     const res = await fetch(url);
@@ -19,6 +22,33 @@ export const SpotListCard = () => {
     const json = await res.json();
     return json.booths;
   });
+
+  const bulkTargets =
+    spots?.map((spot) => ({
+      spotId: spot.id,
+      spotName: spot.title,
+      stampURL: spot.stamp_url,
+    })) ?? [];
+
+  const handleBulkDownload = async () => {
+    if (bulkTargets.length === 0) return;
+    setDownloadingAll(true);
+    try {
+      await downloadPostersBulk(bulkTargets);
+    } finally {
+      setDownloadingAll(false);
+    }
+  };
+
+  const handleBulkPrint = async () => {
+    if (bulkTargets.length === 0) return;
+    setPrintingAll(true);
+    try {
+      await printPostersBulk(bulkTargets);
+    } finally {
+      setPrintingAll(false);
+    }
+  };
 
   return (
     <>
@@ -103,6 +133,26 @@ export const SpotListCard = () => {
         <div className="mt-3 text-center">
           <button type="button" className="text-primary text-sm font-semibold hover:underline">
             すべてのスポットを表示
+          </button>
+        </div>
+        <div className="mt-3 flex justify-around gap-4 text-center">
+          <button
+            type="button"
+            className="btn btn-primary flex-1 rounded-full font-semibold"
+            onClick={handleBulkDownload}
+            disabled={downloadingAll || printingAll || bulkTargets.length === 0}
+          >
+            <Download className="h-4 w-4" />
+            {downloadingAll ? "一括保存中…" : "QRコード一括DL"}
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary flex-1 rounded-full font-semibold"
+            onClick={handleBulkPrint}
+            disabled={printingAll || downloadingAll || bulkTargets.length === 0}
+          >
+            <Printer className="h-4 w-4" />
+            {printingAll ? "一括印刷準備中…" : "QRコード一括印刷"}
           </button>
         </div>
       </Card>

@@ -1,24 +1,24 @@
 "use client";
 
 import { Flag, KeyRound, Mail } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { SubmitEvent, useState } from "react";
+
+import { useAuth } from "./../_hooks/useAuth";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  function onSubmit(e: FormEvent) {
+  const { login } = useAuth();
+
+  const handleLogin = (e: SubmitEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("メールアドレスとパスワードを入力してください");
-      return;
-    }
-    setError(null);
-    router.push("/admin");
-  }
+
+    login(email, password).catch((err) => {
+      setError(err.message || "ログインに失敗しました");
+    });
+  };
 
   return (
     <div className="bg-base-200 flex min-h-screen items-center justify-center px-4 py-10">
@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
             </div>
           </div>
 
-          <form onSubmit={onSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1.5">
               <span className="text-base-content text-xs font-bold">メールアドレス</span>
               <span className="bg-base-200 flex items-center gap-2 rounded-2xl px-3 py-2">
@@ -73,10 +73,6 @@ export default function AdminLoginPage() {
               ログイン
             </button>
           </form>
-
-          <p className="text-base-content/50 mt-4 text-center text-[11px]">
-            ※ 現在はモック画面のため、任意の値でログインできます
-          </p>
         </div>
       </div>
     </div>
