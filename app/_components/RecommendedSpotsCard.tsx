@@ -1,86 +1,96 @@
-import {
-  ChevronLeft,
-  ChevronRight,
-  FlaskConical,
-  Image as ImageIcon,
-  Scissors,
-  Sparkles,
-} from "lucide-react";
-import type { ComponentType, SVGProps } from "react";
+"use client";
+
+import { useMemo } from "react";
+import { MapPin, Sparkles, Users } from "lucide-react";
 import { Badge } from "./ui/Badge";
 import { Card } from "./ui/Card";
+import type { BoothWithCongestion } from "@/schemas";
 
-type Spot = {
-  title: string;
-  description: string;
-  gradient: string;
-  Icon: ComponentType<SVGProps<SVGSVGElement>>;
-  iconColor: string;
+type Props = {
+  booths: BoothWithCongestion[];
 };
 
-const spots: Spot[] = [
-  {
-    title: "科学実験室",
-    description: "ふしぎな実験がいっぱい！体験してみよう！",
-    gradient: "from-indigo-200 via-purple-200 to-pink-200",
-    Icon: FlaskConical,
-    iconColor: "text-violet-700",
-  },
-  {
-    title: "手作り雑貨店",
-    description: "かわいい雑貨がたくさん！お気に入りを見つけてね♪",
-    gradient: "from-amber-100 via-rose-100 to-pink-200",
-    Icon: Scissors,
-    iconColor: "text-rose-700",
-  },
-  {
-    title: "展示コーナー",
-    description: "みんなの力作をじっくり見てみよう！",
-    gradient: "from-emerald-100 via-teal-100 to-cyan-200",
-    Icon: ImageIcon,
-    iconColor: "text-teal-700",
-  },
-];
+function congestionLabel(score: number): { text: string; tone: "green" | "yellow" | "red" } {
+  if (score < 5) return { text: "空いている", tone: "green" };
+  if (score < 10) return { text: "やや混雑", tone: "yellow" };
+  return { text: "混雑", tone: "red" };
+}
 
-export function RecommendedSpotsCard() {
+/** Fisher-Yates shuffle */
+function shuffle<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function pickBooths(booths: BoothWithCongestion[]): BoothWithCongestion[] {
+  const vacant = booths.filter((b) => b.congestion_score < 5);
+
+  if (vacant.length >= 3) {
+    // 空いているのが3つ以上 → ランダムに3つ
+    return shuffle(vacant).slice(0, 3);
+  }
+
+  // 空いているのが3つ未満 → やや混雑以上から補充
+  const others = booths.filter((b) => b.congestion_score >= 5);
+
+  // スコアごとにグループ化し、各グループ内でシャッフル
+  const grouped = new Map<number, BoothWithCongestion[]>();
+  for (const b of others) {
+    const list = grouped.get(b.congestion_score) ?? [];
+    list.push(b);
+    grouped.set(b.congestion_score, list);
+  }
+
+  // スコア昇順、同じスコア内はランダムになるよう各グループをシャッフルして連結
+  const sortedScores = Array.from(grouped.keys()).sort((a, b) => a - b);
+  const shuffledOthers = sortedScores.flatMap((score) => shuffle(grouped.get(score)!));
+
+  const needed = 3 - vacant.length;
+  return [...vacant, ...shuffledOthers.slice(0, needed)];
+}
+
+export function RecommendedSpotsCard({ booths }: Props) {
+  const displayBooths = useMemo(() => pickBooths(booths), [booths]);
+
+  if (displayBooths.length === 0) {
+    return (
+      <Card icon={<Sparkles className="h-5 w-5" />} title="いま空いているおすすめスポット！">
+        <p className="text-base-content/50 py-6 text-center text-sm">
+          現在空いているスポットはありません
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <Card icon={<Sparkles className="h-5 w-5" />} title="いま空いているおすすめスポット！">
-      <div className="relative">
-        <button
-          type="button"
-          aria-label="前へ"
-          className="btn btn-circle btn-sm btn-primary absolute top-[42%] -left-3 z-10 hidden -translate-y-1/2 shadow-md sm:flex"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          aria-label="次へ"
-          className="btn btn-circle btn-sm btn-primary absolute top-[42%] -right-3 z-10 hidden -translate-y-1/2 shadow-md sm:flex"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {displayBooths.map((booth) => {
+          const congestion = congestionLabel(booth.congestion_score);
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:px-2">
-          {spots.map((spot) => (
-            <div key={spot.title} className="flex flex-col gap-2">
-              <div
-                className={`relative aspect-[4/3] overflow-hidden rounded-2xl bg-gradient-to-br ${spot.gradient}`}
-              >
-                <span className="absolute top-2 left-2 z-10">
-                  <Badge tone="green">空いている</Badge>
-                </span>
-                <span className="absolute inset-0 flex items-center justify-center">
-                  <spot.Icon className={`h-14 w-14 ${spot.iconColor}`} />
-                </span>
+          return (
+            <div key={booth.id} className="border-success/20 bg-success/5 rounded-2xl border p-4">
+              <div className="mb-2">
+                <Badge tone={congestion.tone}>{congestion.text}</Badge>
               </div>
-              <div className="px-1">
-                <div className="text-base-content text-sm font-bold">{spot.title}</div>
-                <p className="text-base-content/60 text-xs leading-relaxed">{spot.description}</p>
+              <div className="text-base-content text-sm font-bold">{booth.title}</div>
+              <div className="text-base-content/60 mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {booth.room}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {booth.stallholder}
+                </span>
               </div>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
     </Card>
   );

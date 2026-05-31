@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CongestionCard } from "./_components/CongestionCard";
 import { CongestionTable } from "./_components/CongestionTable";
@@ -13,6 +13,7 @@ import { useUserId } from "../hooks/useUserId";
 import { useToast } from "@/hooks/useToast";
 import { registerScan } from "@/lib/scanRegistration";
 import { invalidateStamps } from "@/lib/stamps";
+import type { BoothWithCongestion } from "@/schemas";
 
 const DRAWER_ID = "main-drawer";
 
@@ -37,6 +38,8 @@ export function HomeClient() {
     if (!acquiredStamp || !userId) return;
     invalidateStamps(userId);
   }, [acquiredStamp, userId]);
+
+  const [booths, setBooths] = useState<BoothWithCongestion[]>([]);
 
   useEffect(() => {
     if (!boothId || !userId) return;
@@ -65,6 +68,27 @@ export function HomeClient() {
     };
   }, [boothId, cleanUrl, notifyStampAcquired, router, showError, userId]);
 
+  // ブース一覧を取得（初回マウント時のみ）
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const res = await fetch("/api/booths");
+        if (!res.ok) throw new Error("ブース情報の取得に失敗しました");
+        const data = (await res.json()) as { booths: BoothWithCongestion[] };
+        if (!cancelled) setBooths(data.booths);
+      } catch {
+        if (!cancelled) showError("ブース情報の取得に失敗しました");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="drawer bg-base-100 text-base-content min-h-screen">
       <input id={DRAWER_ID} type="checkbox" className="drawer-toggle" />
@@ -84,7 +108,7 @@ export function HomeClient() {
                 <CongestionCard />
                 <CongestionTable />
               </div>
-              <RecommendedSpotsCard />
+              <RecommendedSpotsCard booths={booths} />
             </main>
           </div>
         </div>
