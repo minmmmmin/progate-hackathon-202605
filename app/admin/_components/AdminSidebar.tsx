@@ -1,17 +1,4 @@
-import {
-  BarChart3,
-  Bell,
-  Flag,
-  Gift,
-  LayoutDashboard,
-  Map,
-  Plus,
-  QrCode,
-  RefreshCw,
-  Settings,
-  Send,
-  Users,
-} from "lucide-react";
+import { Flag, LayoutDashboard, Map, Plus, QrCode, Users } from "lucide-react";
 import Link from "next/link";
 import type { ComponentType, SVGProps } from "react";
 
@@ -26,10 +13,6 @@ const navItems: NavItem[] = [
   { label: "スポット管理", Icon: Map },
   { label: "スタンプQR管理", Icon: QrCode },
   { label: "混雑状況管理", Icon: Users },
-  { label: "お知らせ管理", Icon: Bell },
-  { label: "来場者データ", Icon: BarChart3 },
-  { label: "景品管理", Icon: Gift },
-  { label: "設定", Icon: Settings },
 ];
 
 type QuickAction = {
@@ -40,9 +23,6 @@ type QuickAction = {
 
 const quickActions: QuickAction[] = [
   { label: "スポットを追加", Icon: Plus, href: "/admin/spots/new" },
-  { label: "QRコードを一括生成", Icon: QrCode },
-  { label: "混雑状況を一括更新", Icon: RefreshCw },
-  { label: "お知らせを投稿", Icon: Send },
 ];
 
 export function AdminSidebar() {

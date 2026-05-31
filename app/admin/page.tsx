@@ -2,10 +2,7 @@
 
 import { AdminSidebar } from "./_components/AdminSidebar";
 import { AdminTopBar } from "./_components/AdminTopBar";
-import { AnnouncementsAdminCard } from "./_components/AnnouncementsAdminCard";
-import { BulkUpdateCard } from "./_components/BulkUpdateCard";
 import { CongestionMapCard } from "./_components/CongestionMapCard";
-import { RealtimeActivityCard } from "./_components/RealtimeActivityCard";
 import { SpotListCard } from "./_components/SpotListCard";
 import { StatsRow } from "./_components/StatsRow";
 import { useAuth } from "./_hooks/useAuth";
@@ -34,16 +31,11 @@ export default function AdminDashboard() {
             </div>
 
             <div className="space-y-5 sm:space-y-6">
-              <AdminTopBar drawerId={DRAWER_ID} lastUpdated="2026/05/30 10:30" />
+              <AdminTopBar drawerId={DRAWER_ID} />
               <StatsRow />
               <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
                 <CongestionMapCard />
                 <SpotListCard />
-              </div>
-              <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-3">
-                <RealtimeActivityCard />
-                <BulkUpdateCard />
-                <AnnouncementsAdminCard />
               </div>
             </div>
           </div>
