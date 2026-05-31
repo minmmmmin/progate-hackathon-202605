@@ -1,16 +1,15 @@
-import { Bell, HelpCircle, LogOut, Menu } from "lucide-react";
+import { Flag, LogOut, Menu } from "lucide-react";
 import { useAuth } from "../_hooks/useAuth";
 
 type AdminTopBarProps = {
   drawerId: string;
-  lastUpdated: string;
 };
 
-export function AdminTopBar({ drawerId, lastUpdated }: AdminTopBarProps) {
+export function AdminTopBar({ drawerId }: AdminTopBarProps) {
   const { logout } = useAuth();
 
   return (
-    <header className="flex flex-wrap items-start justify-between gap-3">
+    <header className="flex flex-col gap-3 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:items-center lg:gap-6">
       <div className="flex items-start gap-3">
         <label
           htmlFor={drawerId}
@@ -19,32 +18,23 @@ export function AdminTopBar({ drawerId, lastUpdated }: AdminTopBarProps) {
         >
           <Menu className="h-6 w-6" />
         </label>
-        <div>
-          <h1 className="text-base-content text-xl font-extrabold sm:text-2xl">
-            ようこそ！文化祭運営チームさん
-          </h1>
-          <p className="text-base-content/60 mt-1 text-xs sm:text-sm">最終更新: {lastUpdated}</p>
+        <div className="text-primary flex items-start gap-2">
+          <Flag className="mt-1 h-6 w-6 shrink-0" />
+          <div className="leading-tight">
+            <div className="text-lg font-extrabold">文化祭</div>
+            <div className="text-lg font-extrabold">スタンプラリー</div>
+            <div className="text-base-content/60 text-[11px] font-semibold">運営管理画面</div>
+          </div>
         </div>
       </div>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-base-content text-lg font-extrabold sm:text-2xl">
+          ようこそ！文化祭運営チームさん
+        </h1>
         <button
           type="button"
-          className="btn btn-ghost btn-sm text-base-content/70 hidden rounded-full font-semibold sm:inline-flex"
-        >
-          <Bell className="h-4 w-4" />
-          お知らせ
-        </button>
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm text-base-content/70 hidden rounded-full font-semibold sm:inline-flex"
-        >
-          <HelpCircle className="h-4 w-4" />
-          ヘルプ
-        </button>
-        <button
-          type="button"
-          className="btn btn-outline btn-primary btn-sm bg-base-100 rounded-full font-semibold"
+          className="btn btn-outline btn-primary btn-sm bg-base-100 ml-auto rounded-full font-semibold"
           onClick={(e) => {
             e.preventDefault();
             logout().then(() => {

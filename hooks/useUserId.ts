@@ -41,12 +41,20 @@ async function ensureUserId(): Promise<string> {
   return inflight;
 }
 
+const readCachedUserId = (): string | undefined => {
+  if (typeof window === "undefined") return undefined;
+  const existing = localStorage.getItem(STORAGE_KEY);
+  if (!existing) return undefined;
+  return existing.startsWith('"') ? (JSON.parse(existing) as string) : existing;
+};
+
 export const useUserId = (): UseUserIdReturn => {
-  const [userId, setUserId] = useState<string | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | undefined>(readCachedUserId);
+  const [isLoading, setIsLoading] = useState(() => readCachedUserId() === undefined);
   const [error, setError] = useState<Error | undefined>();
 
   useEffect(() => {
+    if (userId) return;
     let cancelled = false;
 
     ensureUserId()
@@ -64,6 +72,7 @@ export const useUserId = (): UseUserIdReturn => {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { userId, isLoading, error };

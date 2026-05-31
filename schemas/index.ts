@@ -49,6 +49,16 @@ export const ScanCreateRequestSchema = z.object({
   booth_id: z.uuid().openapi({ example: "123e4567-e89b-12d3-a456-426614174000" }),
 });
 
+export const BoothUpdateRequestSchema = z.object({
+  title: z.string().min(1).openapi({ example: "焼きそば" }),
+  room: z.string().min(1).openapi({ example: "101教室" }),
+  stallholder: z.string().min(1).openapi({ example: "1-A" }),
+});
+
+export const MessageResponseSchema = z.object({
+  message: z.string().openapi({ example: "更新しました" }),
+});
+
 export const ScanResponseSchema = z.object({
   message: z.string().openapi({ example: "スタンプを付与しました" }),
   booth: BoothSchema,
@@ -75,3 +85,5 @@ export type ScanCreateRequest = z.infer<typeof ScanCreateRequestSchema>;
 export type ScanResponse = z.infer<typeof ScanResponseSchema>;
 export type BoothStampUploadResponse = z.infer<typeof BoothStampUploadResponseSchema>;
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
+export type BoothUpdateRequest = z.infer<typeof BoothUpdateRequestSchema>;
+export type MessageResponse = z.infer<typeof MessageResponseSchema>;

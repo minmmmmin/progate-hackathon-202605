@@ -1,4 +1,5 @@
-import { HelpCircle, Menu, Sparkles, UserRound } from "lucide-react";
+import { HelpCircle, Menu, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { PillButton } from "./ui/PillButton";
 
 type TopBarProps = {
@@ -23,19 +24,12 @@ export function TopBar({ drawerId }: TopBarProps) {
           <p className="text-base-content text-xl font-bold">Progate高校スタンプラリーです！</p>
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
-          <PillButton
-            variant="outline"
-            size="sm"
-            leading={<HelpCircle className="h-4 w-4" />}
-            className="hidden sm:inline-flex"
-          >
-            使い方
-          </PillButton>
-          <PillButton variant="filled" size="sm" leading={<UserRound className="h-4 w-4" />}>
-            <span className="hidden sm:inline">マイページ</span>
-            <span className="sm:hidden">マイ</span>
-          </PillButton>
+        <div className="mr-2 ml-auto flex items-center gap-2 lg:mr-0">
+          <Link href="/help">
+            <PillButton variant="outline" size="sm" leading={<HelpCircle className="h-4 w-4" />}>
+              使い方
+            </PillButton>
+          </Link>
         </div>
       </div>
 

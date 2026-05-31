@@ -2,7 +2,12 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { handle } from "hono/vercel";
 import { Scalar } from "@scalar/hono-api-reference";
 import { getSupabaseAdmin, supabase } from "@/lib/supabase";
-import { createBoothRoute, getBoothsRoute } from "@/routes/booths";
+import {
+  createBoothRoute,
+  deleteBoothRoute,
+  getBoothsRoute,
+  updateBoothRoute,
+} from "@/routes/booths";
 import { createScanRoute } from "@/routes/scans";
 import { createUserRoute, getMyStampsRoute } from "@/routes/users";
 import type { Booth, CollectedStamp } from "@/schemas";
@@ -138,6 +143,53 @@ app.openapi(createBoothRoute, async (c) => {
   return c.json(data, 200);
 });
 
+// ブース更新（テキスト情報のみ。スタンプ画像は変更しない）
+app.openapi(updateBoothRoute, async (c) => {
+  const { id } = c.req.valid("param");
+  const { title, room, stallholder } = c.req.valid("json");
+
+  const supabaseAdmin = getSupabaseAdmin();
+  const { data, error } = await supabaseAdmin
+    .from("booths")
+    .update({ title, room, stallholder })
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    return c.json({ message: "ブース更新に失敗しました" }, 500);
+  }
+
+  if (!data) {
+    return c.json({ message: "対象ブースが見つかりません" }, 404);
+  }
+
+  return c.json(data, 200);
+});
+
+// ブース削除
+app.openapi(deleteBoothRoute, async (c) => {
+  const { id } = c.req.valid("param");
+
+  const supabaseAdmin = getSupabaseAdmin();
+  const { data, error } = await supabaseAdmin
+    .from("booths")
+    .delete()
+    .eq("id", id)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return c.json({ message: "ブース削除に失敗しました" }, 500);
+  }
+
+  if (!data) {
+    return c.json({ message: "対象ブースが見つかりません" }, 404);
+  }
+
+  return c.json({ message: "ブースを削除しました" }, 200);
+});
+
 // スキャン登録＆スタンプ付与
 app.openapi(createScanRoute, async (c) => {
   const supabaseAdmin = getSupabaseAdmin();
@@ -221,3 +273,5 @@ app.get(
 
 export const GET = handle(app);
 export const POST = handle(app);
+export const PATCH = handle(app);
+export const DELETE = handle(app);
