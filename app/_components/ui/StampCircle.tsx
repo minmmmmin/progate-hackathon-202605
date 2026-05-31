@@ -28,9 +28,9 @@ const toneClass: Record<StampTone, string> = {
 
 // Tailwind がパージしないようリテラルで定義
 const sizeClass: Record<StampSize, string> = {
-  20: "w-full max-w-24",
-  24: "w-full max-w-24",
-  32: "w-full max-w-32",
+  20: "w-full",
+  24: "w-full",
+  32: "w-full max-w-40",
 };
 
 export function StampCircle({ size = 20, ...props }: Props) {

@@ -124,7 +124,10 @@ export const QrScanner = () => {
             <p className="mb-6 text-center text-sm opacity-70">枠内にQRコードを合わせてください</p>
 
             <div className="bg-base-200 relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-3xl">
-              <div id="qr-video-container" className="h-full w-full object-cover"></div>
+              <div
+                id="qr-video-container"
+                className="absolute inset-0 [&_video]:!absolute [&_video]:!inset-0 [&_video]:!h-full [&_video]:!w-full [&_video]:!object-cover"
+              />
               {scanStatus === "loading" && (
                 <div className="bg-base-100/90 absolute inset-0 flex flex-col items-center justify-center backdrop-blur-sm">
                   <span className="loading loading-spinner loading-lg text-primary"></span>
