@@ -14,7 +14,12 @@ import { useUserId } from "@/hooks/useUserId";
 
 const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"];
 
-export function StampBookCard() {
+type StampBookCardProps = {
+  refreshKey?: number;
+  onStampAcquired?: (stamp: Booth) => void;
+};
+
+export function StampBookCard({ refreshKey = 0, onStampAcquired }: StampBookCardProps) {
   const [booths, setBooths] = useState<Booth[]>([]);
   const [collectedStamps, setCollectedStamps] = useState<CollectedStamp[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +41,7 @@ export function StampBookCard() {
       }
     }
     init();
-  }, [userId]);
+  }, [userId, refreshKey]);
 
   const collectedMap = useMemo(
     () => new Map(collectedStamps.map((s) => [s.id, s])),
@@ -119,7 +124,7 @@ export function StampBookCard() {
         </div>
       )}
       <div className="mt-4">
-        <QrScanner />
+        <QrScanner onRegistered={onStampAcquired} />
       </div>
     </Card>
   );

@@ -70,7 +70,7 @@ export default function StampsPage() {
       <input id={DRAWER_ID} type="checkbox" className="drawer-toggle" />
 
       <div className="drawer-content flex flex-col">
-        <div className="mx-auto w-full max-w-[1440px] space-y-5 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-6 lg:px-8">
+        <div className="mx-auto w-full max-w-360 space-y-5 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-6 lg:px-8">
           <TopBar drawerId={DRAWER_ID} />
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
@@ -81,7 +81,7 @@ export default function StampsPage() {
             <main className="flex flex-col gap-5 sm:gap-6">
               <div className="flex items-center gap-4">
                 <Link href="/">
-                  <PillButton variant="outline" className="h-10 w-10 !p-0">
+                  <PillButton variant="outline" className="h-10 w-10 p-0">
                     <ChevronLeft className="h-5 w-5" />
                   </PillButton>
                 </Link>
@@ -171,9 +171,9 @@ export default function StampsPage() {
       >
         {selectedBooth && (
           <>
-            <div className="modal-box overflow-hidden rounded-t-[2.5rem] p-0 sm:rounded-[2rem]">
+            <div className="modal-box overflow-hidden rounded-t-[2.5rem] p-0 sm:rounded-4xl">
               <div
-                className={`h-32 w-full bg-gradient-to-br ${
+                className={`bg-liner-to-br h-32 w-full ${
                   selectedBooth.collected
                     ? "from-secondary/20 to-primary/20"
                     : "from-base-200 to-base-300"
