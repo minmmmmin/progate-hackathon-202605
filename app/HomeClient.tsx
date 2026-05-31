@@ -12,7 +12,7 @@ import { useUserId } from "../hooks/useUserId";
 import { useToast } from "@/hooks/useToast";
 import { registerScan } from "@/lib/scanRegistration";
 import { invalidateStamps } from "@/lib/stamps";
-import type { Booth } from "@/schemas";
+import type { Booth, BoothWithCongestion } from "@/schemas";
 
 const DRAWER_ID = "main-drawer";
 
@@ -43,6 +43,8 @@ export function HomeClient() {
     [userId],
   );
 
+  const [booths, setBooths] = useState<BoothWithCongestion[]>([]);
+
   useEffect(() => {
     if (!boothId || !userId) return;
     if (processedBoothIdRef.current === boothId) return;
@@ -70,6 +72,30 @@ export function HomeClient() {
     };
   }, [boothId, cleanUrl, handleStampAcquired, router, showError, userId]);
 
+  // ブース一覧を取得（マウント & showError の参照が変わったとき）
+  const showErrorRef = useRef(showError);
+  showErrorRef.current = showError;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const res = await fetch("/api/booths");
+        if (!res.ok) throw new Error("ブース情報の取得に失敗しました");
+        const data = (await res.json()) as { booths: BoothWithCongestion[] };
+        if (!cancelled) setBooths(data.booths);
+      } catch {
+        if (!cancelled) showErrorRef.current("ブース情報の取得に失敗しました");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="drawer bg-base-100 text-base-content min-h-screen">
       <input id={DRAWER_ID} type="checkbox" className="drawer-toggle" />
@@ -87,7 +113,7 @@ export function HomeClient() {
               <StampBookCard refreshKey={stampRefreshKey} onStampAcquired={handleStampAcquired} />
               <CongestionCard />
               <div className="lg:col-span-2">
-                <RecommendedSpotsCard />
+                <RecommendedSpotsCard booths={booths} />
               </div>
             </main>
           </div>
