@@ -41,7 +41,7 @@ async function ensureUserId(): Promise<string> {
   return inflight;
 }
 
-export function useUserId(): UseUserIdReturn {
+export const useUserId = (): UseUserIdReturn => {
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>();
@@ -67,4 +67,4 @@ export function useUserId(): UseUserIdReturn {
   }, []);
 
   return { userId, isLoading, error };
-}
+};
