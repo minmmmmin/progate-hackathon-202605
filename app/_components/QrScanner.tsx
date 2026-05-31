@@ -5,15 +5,16 @@ import { Html5Qrcode } from "html5-qrcode";
 import { Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 
-type ScanStatus = "idle" | "loading";
+import { useUserId } from "@/hooks/useUserId";
 
-const FIXED_USER_ID = "34687da4-c380-4a26-a728-ee85c330bdf0";
+type ScanStatus = "idle" | "loading";
 
 export const QrScanner = () => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [scanStatus, setScanStatus] = useState<ScanStatus>("idle");
 
   const { showSuccess, showError } = useToast();
+  const { userId } = useUserId();
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const isProcessingRef = useRef(false);
@@ -78,7 +79,7 @@ export const QrScanner = () => {
       const res = await fetch("/api/scans", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: FIXED_USER_ID, booth_id: boothId }),
+        body: JSON.stringify({ user_id: userId, booth_id: boothId }),
       });
       const data = await res.json();
 
