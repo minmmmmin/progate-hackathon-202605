@@ -13,8 +13,7 @@ import { useUserId } from "../hooks/useUserId";
 import { useToast } from "@/hooks/useToast";
 import { registerScan } from "@/lib/scanRegistration";
 import { invalidateStamps } from "@/lib/stamps";
-import type { Booth, BoothWithCongestion } from "@/schemas";
-
+import type { BoothWithCongestion } from "@/schemas";
 
 const DRAWER_ID = "main-drawer";
 
@@ -109,7 +108,6 @@ export function HomeClient() {
                 <CongestionCard />
                 <CongestionTable />
               </div>
-
               <RecommendedSpotsCard booths={booths} />
             </main>
           </div>
