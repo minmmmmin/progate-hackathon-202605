@@ -1,5 +1,7 @@
+import { useState, useMemo } from "react";
 import { Signal } from "lucide-react";
 import { Card } from "./ui/Card";
+import { SegmentedControl } from "./ui/SegmentedControl";
 import useSWR from "swr";
 import { BoothWithCongestion } from "@/schemas";
 
@@ -34,11 +36,15 @@ function getCongestionInfo(score: number): CongestionInfo {
   };
 }
 
+type SortKey = "room" | "congestion";
+
 type CongestionTableProps = {
   className?: string;
 };
 
 export function CongestionTable({ className = "" }: CongestionTableProps) {
+  const [sortBy, setSortBy] = useState<SortKey>("room");
+
   const {
     data: booths,
     isLoading,
@@ -53,6 +59,17 @@ export function CongestionTable({ className = "" }: CongestionTableProps) {
     },
     { refreshInterval: 30000, revalidateOnFocus: true },
   );
+
+  const sortedBooths = useMemo(() => {
+    if (!booths) return null;
+    const sorted = [...booths];
+    if (sortBy === "room") {
+      sorted.sort((a, b) => a.room.localeCompare(b.room, "ja"));
+    } else {
+      sorted.sort((a, b) => b.congestion_score - a.congestion_score);
+    }
+    return sorted;
+  }, [booths, sortBy]);
 
   if (isLoading) {
     return (
@@ -76,9 +93,21 @@ export function CongestionTable({ className = "" }: CongestionTableProps) {
 
   return (
     <Card icon={<Signal className="h-5 w-5" />} title="混雑状況" className={className}>
-      {booths ? (
+      {/* ソート切り替え */}
+      <div className="mb-3 flex items-center justify-end">
+        <SegmentedControl
+          options={[
+            { value: "room", label: "場所順" },
+            { value: "congestion", label: "混雑順" },
+          ]}
+          value={sortBy}
+          onChange={setSortBy}
+        />
+      </div>
+
+      {sortedBooths ? (
         <div className="space-y-2">
-          {booths.map((booth) => {
+          {sortedBooths.map((booth) => {
             const { label, dotClass, bgClass } = getCongestionInfo(booth.congestion_score);
             return (
               <div
@@ -100,7 +129,7 @@ export function CongestionTable({ className = "" }: CongestionTableProps) {
               </div>
             );
           })}
-          {booths.length === 0 && (
+          {sortedBooths.length === 0 && (
             <p className="py-4 text-center text-sm text-gray-500">表示するブースがありません</p>
           )}
         </div>
