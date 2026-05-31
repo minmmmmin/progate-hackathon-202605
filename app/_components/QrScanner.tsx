@@ -85,6 +85,10 @@ function QrScannerModal({ onClose }: { onClose: () => void }) {
           throw new Error("無効なQRコードです");
         }
 
+        if (!userId) {
+          throw new Error("ユーザー情報を取得中です。少し待ってからもう一度お試しください。");
+        }
+
         const res = await fetch("/api/scans", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
