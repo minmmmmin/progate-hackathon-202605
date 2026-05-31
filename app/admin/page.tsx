@@ -1,5 +1,6 @@
 "use client";
 
+import { CongestionTable } from "../_components/CongestionTable";
 import { AdminSidebar } from "./_components/AdminSidebar";
 import { AdminTopBar } from "./_components/AdminTopBar";
 import { CongestionMapCard } from "./_components/CongestionMapCard";
@@ -34,7 +35,10 @@ export default function AdminDashboard() {
               <AdminTopBar drawerId={DRAWER_ID} />
               <StatsRow />
               <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
-                <CongestionMapCard />
+                <div className="space-y-5 sm:space-y-6">
+                  <CongestionMapCard />
+                  <CongestionTable />
+                </div>
                 <SpotListCard />
               </div>
             </div>

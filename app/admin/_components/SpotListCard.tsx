@@ -1,21 +1,30 @@
 "use client";
 
-import { Bookmark, Download, MoreHorizontal, Plus, Printer } from "lucide-react";
+import { Bookmark, Download, Plus, Printer, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Card } from "../../_components/ui/Card";
 import useSWR from "swr";
 import Image from "next/image";
 import { BoothWithCongestion } from "@/schemas";
+import { useToast } from "@/hooks/useToast";
 import { QrCodeDialog } from "./QrCodeDialog";
+import { SpotEditDialog } from "./SpotEditDialog";
 import { downloadPostersBulk, printPostersBulk } from "./qrPosterUtils";
 
 export const SpotListCard = () => {
   const [qrSpot, setQrSpot] = useState<BoothWithCongestion | null>(null);
+  const [editSpot, setEditSpot] = useState<BoothWithCongestion | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [printingAll, setPrintingAll] = useState(false);
+  const { showSuccess, showError } = useToast();
 
-  const { data: spots, isLoading } = useSWR<BoothWithCongestion[]>(
+  const {
+    data: spots,
+    isLoading,
+    mutate,
+  } = useSWR<BoothWithCongestion[]>(
     "/api/booths",
     async (url: string) => {
       const res = await fetch(url);
@@ -54,6 +63,48 @@ export const SpotListCard = () => {
     }
   };
 
+  const handleEditSubmit = async (input: {
+    title: string;
+    room: string;
+    stallholder: string;
+  }) => {
+    if (!editSpot) return;
+    try {
+      const res = await fetch(`/api/booths/${editSpot.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json?.message ?? "更新に失敗しました");
+      }
+      showSuccess("スポット情報を更新しました");
+      setEditSpot(null);
+      await mutate();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : "更新に失敗しました");
+    }
+  };
+
+  const handleDelete = async (spot: BoothWithCongestion) => {
+    if (!window.confirm(`「${spot.title}」を削除しますか？`)) return;
+    setDeletingId(spot.id);
+    try {
+      const res = await fetch(`/api/booths/${spot.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json?.message ?? "削除に失敗しました");
+      }
+      showSuccess("スポットを削除しました");
+      await mutate();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : "削除に失敗しました");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <>
       <Card
@@ -76,7 +127,6 @@ export const SpotListCard = () => {
               <tr className="text-base-content/60 text-left text-xs font-semibold">
                 <th className="px-2 py-2">スポット名</th>
                 <th className="px-2 py-2">場所</th>
-                {/* <th className="px-2 py-2">混雑状況</th> */}
                 <th className="px-2 py-2">QRコード</th>
                 <th className="px-2 py-2">操作</th>
               </tr>
@@ -99,13 +149,6 @@ export const SpotListCard = () => {
                     </div>
                   </td>
                   <td className="text-base-content/70 px-2 py-3 text-sm">{spot.room}</td>
-                  {/* <td className="px-2 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold`}
-                      >
-                        {spot.congestion}
-                      </span>
-                    </td> */}
                   <td className="px-2 py-3">
                     <button
                       type="button"
@@ -121,11 +164,18 @@ export const SpotListCard = () => {
                       <button
                         type="button"
                         className="btn btn-xs btn-outline rounded-lg font-semibold"
+                        onClick={() => setEditSpot(spot)}
                       >
                         編集
                       </button>
-                      <button type="button" aria-label="その他" className="btn btn-xs btn-ghost">
-                        <MoreHorizontal className="h-4 w-4" />
+                      <button
+                        type="button"
+                        aria-label={`${spot.title} を削除`}
+                        className="btn btn-xs btn-ghost text-error"
+                        onClick={() => handleDelete(spot)}
+                        disabled={deletingId === spot.id}
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </td>
@@ -133,11 +183,6 @@ export const SpotListCard = () => {
               ))}
             </tbody>
           </table>
-        </div>
-        <div className="mt-3 text-center">
-          <button type="button" className="text-primary text-sm font-semibold hover:underline">
-            すべてのスポットを表示
-          </button>
         </div>
         <div className="mt-3 flex justify-around gap-4 text-center">
           <button
@@ -167,6 +212,13 @@ export const SpotListCard = () => {
         spotId={qrSpot?.id || ""}
         spotName={qrSpot?.title ?? ""}
         stampURL={qrSpot?.stamp_url ?? ""}
+      />
+
+      <SpotEditDialog
+        open={editSpot !== null}
+        spot={editSpot}
+        onClose={() => setEditSpot(null)}
+        onSubmit={handleEditSubmit}
       />
     </>
   );

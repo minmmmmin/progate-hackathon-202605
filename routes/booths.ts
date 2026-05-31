@@ -1,5 +1,18 @@
-import { createRoute } from "@hono/zod-openapi";
-import { BoothListWithCongestionResponseSchema, BoothSchema, ErrorResponseSchema } from "@/schemas";
+import { createRoute, z } from "@hono/zod-openapi";
+import {
+  BoothListWithCongestionResponseSchema,
+  BoothSchema,
+  BoothUpdateRequestSchema,
+  ErrorResponseSchema,
+  MessageResponseSchema,
+} from "@/schemas";
+
+const BoothIdParamsSchema = z.object({
+  id: z.uuid().openapi({
+    param: { name: "id", in: "path" },
+    example: "123e4567-e89b-12d3-a456-426614174000",
+  }),
+});
 
 export const getBoothsRoute = createRoute({
   method: "get",
@@ -69,6 +82,93 @@ export const createBoothRoute = createRoute({
     },
     400: {
       description: "リクエスト不正",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    500: {
+      description: "サーバーエラー",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+});
+
+export const updateBoothRoute = createRoute({
+  method: "patch",
+  path: "/booths/{id}",
+  tags: ["booths"],
+  summary: "ブースのテキスト情報を更新する（スタンプ画像は変更しない）",
+  request: {
+    params: BoothIdParamsSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: BoothUpdateRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "更新後のブース情報",
+      content: {
+        "application/json": {
+          schema: BoothSchema,
+        },
+      },
+    },
+    400: {
+      description: "リクエスト不正",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    404: {
+      description: "対象ブースが存在しない",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    500: {
+      description: "サーバーエラー",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+});
+
+export const deleteBoothRoute = createRoute({
+  method: "delete",
+  path: "/booths/{id}",
+  tags: ["booths"],
+  summary: "ブースを削除する",
+  request: {
+    params: BoothIdParamsSchema,
+  },
+  responses: {
+    200: {
+      description: "削除成功",
+      content: {
+        "application/json": {
+          schema: MessageResponseSchema,
+        },
+      },
+    },
+    404: {
+      description: "対象ブースが存在しない",
       content: {
         "application/json": {
           schema: ErrorResponseSchema,
