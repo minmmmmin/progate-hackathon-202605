@@ -7,6 +7,7 @@ import type { Booth, CollectedStamp } from "@/schemas";
 import { Sidebar } from "../_components/Sidebar";
 import { TopBar } from "../_components/TopBar";
 import { Card } from "../_components/ui/Card";
+import { SegmentedControl } from "../_components/ui/SegmentedControl";
 import { StampCircle, type StampTone } from "../_components/ui/StampCircle";
 import { useUserId } from "@/hooks/useUserId";
 
@@ -97,24 +98,14 @@ export default function StampsPage() {
                   )
                 }
               >
-                <div role="tablist" className="tabs tabs-boxed bg-base-200/60 w-fit">
-                  <button
-                    type="button"
-                    role="tab"
-                    className={`tab ${sortMode === "class" ? "tab-active" : ""}`}
-                    onClick={() => setSortMode("class")}
-                  >
-                    クラス順
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    className={`tab ${sortMode === "acquired" ? "tab-active" : ""}`}
-                    onClick={() => setSortMode("acquired")}
-                  >
-                    入手順
-                  </button>
-                </div>
+                <SegmentedControl
+                  options={[
+                    { value: "class", label: "クラス順" },
+                    { value: "acquired", label: "入手順" },
+                  ]}
+                  value={sortMode}
+                  onChange={setSortMode}
+                />
 
                 <div className="grid grid-cols-3 gap-x-2 gap-y-10 py-6 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
                   {loading

@@ -7,6 +7,7 @@ import { fetchBooths, fetchStamps, sortBooths, type SortMode } from "@/lib/stamp
 
 import type { Booth, CollectedStamp } from "@/schemas";
 import { Card } from "./ui/Card";
+import { SegmentedControl } from "./ui/SegmentedControl";
 import { PillButton } from "./ui/PillButton";
 import { StampCircle, type StampTone } from "./ui/StampCircle";
 import { useQrScanner } from "./QrScanner";
@@ -68,24 +69,14 @@ export function StampBookCard({ refreshKey = 0 }: StampBookCardProps) {
         )
       }
     >
-      <div role="tablist" className="tabs tabs-boxed tabs-sm bg-base-200/60 w-fit">
-        <button
-          type="button"
-          role="tab"
-          className={`tab ${sortMode === "class" ? "tab-active" : ""}`}
-          onClick={() => setSortMode("class")}
-        >
-          クラス順
-        </button>
-        <button
-          type="button"
-          role="tab"
-          className={`tab ${sortMode === "acquired" ? "tab-active" : ""}`}
-          onClick={() => setSortMode("acquired")}
-        >
-          入手順
-        </button>
-      </div>
+      <SegmentedControl
+        options={[
+          { value: "class", label: "クラス順" },
+          { value: "acquired", label: "入手順" },
+        ]}
+        value={sortMode}
+        onChange={setSortMode}
+      />
 
       <div className="grid grid-cols-4 gap-x-2 gap-y-5 py-2 sm:grid-cols-5">
         {loading
