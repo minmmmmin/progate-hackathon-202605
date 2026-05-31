@@ -28,6 +28,10 @@ export const BoothWithCongestionSchema = BoothSchema.extend({
   congestion_score: z.number().int().openapi({ example: 5 }),
 });
 
+export const CollectedStampSchema = BoothSchema.extend({
+  acquired_at: z.iso.datetime().openapi({ example: "2026-05-29T12:34:56.000Z" }),
+});
+
 export const BoothListResponseSchema = z.object({
   booths: z.array(BoothSchema),
 });
@@ -37,7 +41,7 @@ export const BoothListWithCongestionResponseSchema = z.object({
 });
 
 export const StampListResponseSchema = z.object({
-  stamps: z.array(BoothSchema),
+  stamps: z.array(CollectedStampSchema),
 });
 
 export const ScanCreateRequestSchema = z.object({
@@ -61,6 +65,7 @@ export const ErrorResponseSchema = z.object({
 export type User = z.infer<typeof UserSchema>;
 export type Booth = z.infer<typeof BoothSchema>;
 export type BoothWithCongestion = z.infer<typeof BoothWithCongestionSchema>;
+export type CollectedStamp = z.infer<typeof CollectedStampSchema>;
 export type ScanLog = z.infer<typeof ScanLogSchema>;
 export type UserIdResponse = z.infer<typeof UserIdResponseSchema>;
 export type BoothListResponse = z.infer<typeof BoothListResponseSchema>;

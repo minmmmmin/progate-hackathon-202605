@@ -1,13 +1,11 @@
 "use client";
 
-"use client";
-
 import { ChevronRight, Flag, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { fetchBooths, fetchStamps } from "@/lib/stamps";
+import { useEffect, useMemo, useState } from "react";
+import { fetchBooths, fetchStamps, sortBooths, type SortMode } from "@/lib/stamps";
 
-import type { Booth } from "@/schemas";
+import type { Booth, CollectedStamp } from "@/schemas";
 import { Card } from "./ui/Card";
 import { PillButton } from "./ui/PillButton";
 import { StampCircle, type StampTone } from "./ui/StampCircle";
@@ -18,8 +16,9 @@ const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"]
 
 export function StampBookCard() {
   const [booths, setBooths] = useState<Booth[]>([]);
-  const [collectedStamps, setCollectedStamps] = useState<Booth[]>([]);
+  const [collectedStamps, setCollectedStamps] = useState<CollectedStamp[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortMode, setSortMode] = useState<SortMode>("class");
   const { userId } = useUserId();
 
   useEffect(() => {
@@ -39,8 +38,15 @@ export function StampBookCard() {
     init();
   }, [userId]);
 
-  const collectedIds = new Set(collectedStamps.map((s) => s.id));
-  const displayBooths = booths.slice(0, 10); // トップページには最大10個表示
+  const collectedMap = useMemo(
+    () => new Map(collectedStamps.map((s) => [s.id, s])),
+    [collectedStamps],
+  );
+
+  const displayBooths = useMemo(
+    () => sortBooths(booths, collectedMap, sortMode).slice(0, 10),
+    [booths, collectedMap, sortMode],
+  );
 
   return (
     <Card
@@ -57,6 +63,25 @@ export function StampBookCard() {
         )
       }
     >
+      <div role="tablist" className="tabs tabs-boxed tabs-sm bg-base-200/60 w-fit">
+        <button
+          type="button"
+          role="tab"
+          className={`tab ${sortMode === "class" ? "tab-active" : ""}`}
+          onClick={() => setSortMode("class")}
+        >
+          クラス順
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className={`tab ${sortMode === "acquired" ? "tab-active" : ""}`}
+          onClick={() => setSortMode("acquired")}
+        >
+          入手順
+        </button>
+      </div>
+
       <div className="grid grid-cols-4 gap-x-2 gap-y-5 py-2 sm:grid-cols-5">
         {loading
           ? Array.from({ length: 10 }).map((_, i) => (
@@ -66,7 +91,7 @@ export function StampBookCard() {
               </div>
             ))
           : displayBooths.map((booth, idx) => {
-              const isCollected = collectedIds.has(booth.id);
+              const isCollected = collectedMap.has(booth.id);
               return isCollected ? (
                 <StampCircle
                   key={booth.id}

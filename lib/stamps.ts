@@ -1,9 +1,9 @@
-import type { Booth } from "@/schemas";
+import type { Booth, CollectedStamp } from "@/schemas";
 
-const stampsCache = new Map<string, Promise<Booth[]>>();
+const stampsCache = new Map<string, Promise<CollectedStamp[]>>();
 let boothsCache: Promise<Booth[]> | null = null;
 
-export async function fetchStamps(userId: string): Promise<Booth[]> {
+export async function fetchStamps(userId: string): Promise<CollectedStamp[]> {
   const cached = stampsCache.get(userId);
   if (cached) return cached;
 
@@ -15,7 +15,7 @@ export async function fetchStamps(userId: string): Promise<Booth[]> {
       stampsCache.delete(userId);
       throw new Error("スタンプ取得に失敗しました");
     }
-    const body = (await res.json()) as { stamps: Booth[] };
+    const body = (await res.json()) as { stamps: CollectedStamp[] };
     return body.stamps;
   })();
 
@@ -46,4 +46,28 @@ export function invalidateStamps(userId?: string) {
 
 export function invalidateBooths() {
   boothsCache = null;
+}
+
+export type SortMode = "class" | "acquired";
+
+export const compareByClass = (a: Booth, b: Booth) =>
+  a.stallholder.localeCompare(b.stallholder, "ja", { numeric: true });
+
+export function sortBooths(
+  booths: Booth[],
+  collectedMap: Map<string, CollectedStamp>,
+  mode: SortMode,
+): Booth[] {
+  if (mode === "class") {
+    return [...booths].sort(compareByClass);
+  }
+  const collected = booths
+    .filter((b) => collectedMap.has(b.id))
+    .sort((a, b) => {
+      const ta = collectedMap.get(a.id)!.acquired_at;
+      const tb = collectedMap.get(b.id)!.acquired_at;
+      return ta.localeCompare(tb);
+    });
+  const locked = booths.filter((b) => !collectedMap.has(b.id)).sort(compareByClass);
+  return [...collected, ...locked];
 }
