@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocalStorage } from "react-use";
+import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "user-id";
 
@@ -11,41 +10,64 @@ type UseUserIdReturn = {
   error: Error | undefined;
 };
 
+// 同時にマウントされた複数コンポーネントから POST /api/users が重複発火しないよう、
+// モジュールスコープで in-flight Promise を共有する
+let inflight: Promise<string> | null = null;
+
+async function ensureUserId(): Promise<string> {
+  const existing = localStorage.getItem(STORAGE_KEY);
+  if (existing) {
+    // 旧実装 (useLocalStorage) が JSON エンコードして保存していた値を素の文字列に正規化
+    const normalized = existing.startsWith('"') ? (JSON.parse(existing) as string) : existing;
+    if (normalized !== existing) {
+      localStorage.setItem(STORAGE_KEY, normalized);
+    }
+    return normalized;
+  }
+
+  if (inflight) return inflight;
+
+  inflight = (async () => {
+    try {
+      const res = await fetch("/api/users", { method: "POST" });
+      if (!res.ok) {
+        throw new Error("ユーザー作成に失敗しました");
+      }
+      const data = (await res.json()) as { user_id: string };
+      localStorage.setItem(STORAGE_KEY, data.user_id);
+      return data.user_id;
+    } finally {
+      inflight = null;
+    }
+  })();
+
+  return inflight;
+}
+
 export const useUserId = (): UseUserIdReturn => {
   const [storedUserId, setStoredUserId] = useLocalStorage<string>(STORAGE_KEY);
   const [isLoading, setIsLoading] = useState(!storedUserId);
   const [error, setError] = useState<Error | undefined>();
-  const calledRef = useRef(false);
-
-  const createUser = useCallback(async () => {
-    const res = await fetch("/api/users", { method: "POST" });
-
-    if (!res.ok) {
-      throw new Error("ユーザー作成に失敗しました");
-    }
-
-    const data = await res.json();
-    return data.user_id as string;
-  }, []);
 
   useEffect(() => {
-    // 既にユーザーIDが保存されている場合は作成不要
-    if (storedUserId) return;
+    let cancelled = false;
 
-    // 多重呼び出し防止（Strict Mode対策）
-    if (calledRef.current) return;
-    calledRef.current = true;
-
-    createUser()
+    ensureUserId()
       .then((id) => {
-        setStoredUserId(id);
+        if (cancelled) return;
+        setUserId(id);
         setIsLoading(false);
       })
       .catch((e) => {
+        if (cancelled) return;
         setError(e instanceof Error ? e : new Error(String(e)));
         setIsLoading(false);
       });
-  }, [storedUserId, createUser, setStoredUserId]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return { userId: storedUserId, isLoading, error };
 };
