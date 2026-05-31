@@ -1,15 +1,7 @@
 import { Signal } from "lucide-react";
 import { Card } from "./ui/Card";
 import useSWR from "swr";
-
-type BoothWithCongestion = {
-  id: string;
-  title: string;
-  room: string;
-  stallholder: string;
-  stamp_url: string;
-  congestion_score: number;
-};
+import { BoothWithCongestion } from "@/schemas";
 
 type CongestionInfo = {
   label: string;
@@ -51,12 +43,12 @@ export function CongestionTable({ className = "" }: CongestionTableProps) {
     data: booths,
     isLoading,
     error,
-  } = useSWR(
+  } = useSWR<BoothWithCongestion[]>(
     "/api/booths",
     async (url: string) => {
       const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch booths");
-      const booths = (await res.json()) as Promise<{ booths: BoothWithCongestion[] }>;
+      const booths = await res.json();
       return (await booths).booths;
     },
     { refreshInterval: 30000, revalidateOnFocus: true },

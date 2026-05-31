@@ -6,16 +6,16 @@ import { useState } from "react";
 import { Card } from "../../_components/ui/Card";
 import useSWR from "swr";
 import Image from "next/image";
-import { Booth } from "@/schemas";
+import { BoothWithCongestion } from "@/schemas";
 import { QrCodeDialog } from "./QrCodeDialog";
 import { downloadPostersBulk, printPostersBulk } from "./qrPosterUtils";
 
 export const SpotListCard = () => {
-  const [qrSpot, setQrSpot] = useState<Booth | null>(null);
+  const [qrSpot, setQrSpot] = useState<BoothWithCongestion | null>(null);
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [printingAll, setPrintingAll] = useState(false);
 
-  const { data: spots, isLoading } = useSWR<Booth[]>(
+  const { data: spots, isLoading } = useSWR<BoothWithCongestion[]>(
     "/api/booths",
     async (url: string) => {
       const res = await fetch(url);
