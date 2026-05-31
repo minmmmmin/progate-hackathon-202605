@@ -63,11 +63,7 @@ export const SpotListCard = () => {
     }
   };
 
-  const handleEditSubmit = async (input: {
-    title: string;
-    room: string;
-    stallholder: string;
-  }) => {
+  const handleEditSubmit = async (input: { title: string; room: string; stallholder: string }) => {
     if (!editSpot) return;
     try {
       const res = await fetch(`/api/booths/${editSpot.id}`, {
@@ -215,6 +211,7 @@ export const SpotListCard = () => {
       />
 
       <SpotEditDialog
+        key={editSpot?.id ?? "none"}
         open={editSpot !== null}
         spot={editSpot}
         onClose={() => setEditSpot(null)}

@@ -13,9 +13,9 @@ type SpotEditDialogProps = {
 
 export const SpotEditDialog: FC<SpotEditDialogProps> = ({ open, spot, onClose, onSubmit }) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [title, setTitle] = useState("");
-  const [room, setRoom] = useState("");
-  const [stallholder, setStallholder] = useState("");
+  const [title, setTitle] = useState(spot?.title ?? "");
+  const [room, setRoom] = useState(spot?.room ?? "");
+  const [stallholder, setStallholder] = useState(spot?.stallholder ?? "");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -24,14 +24,6 @@ export const SpotEditDialog: FC<SpotEditDialogProps> = ({ open, spot, onClose, o
     if (open && !dialog.open) dialog.showModal();
     if (!open && dialog.open) dialog.close();
   }, [open]);
-
-  useEffect(() => {
-    if (spot) {
-      setTitle(spot.title);
-      setRoom(spot.room);
-      setStallholder(spot.stallholder);
-    }
-  }, [spot]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,9 +71,7 @@ export const SpotEditDialog: FC<SpotEditDialogProps> = ({ open, spot, onClose, o
             />
           </label>
           <label className="form-control">
-            <span className="label-text text-base-content/70 mb-1 text-xs font-semibold">
-              場所
-            </span>
+            <span className="label-text text-base-content/70 mb-1 text-xs font-semibold">場所</span>
             <input
               type="text"
               className="input input-bordered w-full"
