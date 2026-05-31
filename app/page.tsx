@@ -1,16 +1,63 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CongestionCard } from "./_components/CongestionCard";
 import { RecommendedSpotsCard } from "./_components/RecommendedSpotsCard";
 import { Sidebar } from "./_components/Sidebar";
 import { StampBookCard } from "./_components/StampBookCard";
 import { TopBar } from "./_components/TopBar";
 import { useUserId } from "../hooks/useUserId";
+import { useToast } from "@/hooks/useToast";
+import { registerScan } from "@/lib/scanRegistration";
+import { invalidateStamps } from "@/lib/stamps";
 
 const DRAWER_ID = "main-drawer";
 
 export default function Home() {
-  useUserId();
+  const { userId } = useUserId();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { showSuccess, showError } = useToast();
+  const processedBoothIdRef = useRef<string | null>(null);
+  const [stampRefreshKey, setStampRefreshKey] = useState(0);
+
+  const boothId = searchParams.get("id");
+  const cleanSearchParams = new URLSearchParams(searchParams.toString());
+  cleanSearchParams.delete("id");
+  const cleanUrl = cleanSearchParams.toString()
+    ? `${pathname}?${cleanSearchParams.toString()}`
+    : pathname;
+
+  useEffect(() => {
+    if (!boothId || !userId) return;
+    if (processedBoothIdRef.current === boothId) return;
+
+    let cancelled = false;
+    processedBoothIdRef.current = boothId;
+
+    void (async () => {
+      try {
+        await registerScan({ userId, boothId });
+        invalidateStamps(userId);
+        setStampRefreshKey((current) => current + 1);
+        if (cancelled) return;
+        showSuccess("スタンプを獲得しました！");
+      } catch (err) {
+        if (cancelled) return;
+        showError(err instanceof Error ? err.message : "通信エラーが発生しました。");
+      } finally {
+        if (!cancelled) {
+          router.replace(cleanUrl, { scroll: false });
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [boothId, cleanUrl, router, showError, showSuccess, userId]);
 
   return (
     <div className="drawer bg-base-100 text-base-content min-h-screen">
@@ -22,11 +69,11 @@ export default function Home() {
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
             <div className="hidden lg:block">
-              <Sidebar />
+              <Sidebar refreshKey={stampRefreshKey} />
             </div>
 
             <main className="grid auto-rows-min grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
-              <StampBookCard />
+              <StampBookCard refreshKey={stampRefreshKey} />
               <CongestionCard />
               <div className="lg:col-span-2">
                 <RecommendedSpotsCard />
@@ -38,7 +85,7 @@ export default function Home() {
 
       <div className="drawer-side lg:hidden">
         <label htmlFor={DRAWER_ID} aria-label="メニューを閉じる" className="drawer-overlay" />
-        <Sidebar />
+        <Sidebar refreshKey={stampRefreshKey} />
       </div>
     </div>
   );

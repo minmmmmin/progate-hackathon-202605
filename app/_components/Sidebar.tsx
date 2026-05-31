@@ -19,7 +19,11 @@ const navItems: NavItem[] = [
   { label: "スタンプ帳", Icon: BookOpenCheck, href: "/stamps" },
 ];
 
-export function Sidebar() {
+type SidebarProps = {
+  refreshKey?: number;
+};
+
+export function Sidebar({ refreshKey = 0 }: SidebarProps) {
   const pathname = usePathname();
   const [counts, setCounts] = useState({ collected: 0, total: 0 });
 
@@ -37,7 +41,7 @@ export function Sidebar() {
       }
     }
     init();
-  }, [userId]);
+  }, [userId, refreshKey]);
 
   return (
     <aside className="bg-base-200 flex h-full w-72 max-w-[80vw] flex-col gap-5 p-5 lg:w-full lg:max-w-none lg:bg-transparent lg:p-0">

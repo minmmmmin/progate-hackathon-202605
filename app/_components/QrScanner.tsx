@@ -6,6 +6,7 @@ import { Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 
 import { useUserId } from "@/hooks/useUserId";
+import { extractBoothIdFromTarget, registerScan } from "@/lib/scanRegistration";
 
 type ScanStatus = "idle" | "loading";
 
@@ -64,30 +65,17 @@ export const QrScanner = () => {
     setScanStatus("loading");
 
     try {
-      let boothId: string | null = null;
-      try {
-        const url = new URL(decodedText);
-        boothId = url.searchParams.get("id");
-      } catch {
-        throw new Error("QRコードの読み取りに失敗しました");
-      }
+      const boothId = extractBoothIdFromTarget(decodedText);
 
       if (!boothId) {
         throw new Error("無効なQRコードです");
       }
 
-      const res = await fetch("/api/scans", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, booth_id: boothId }),
-      });
-      const data = await res.json();
+      const result = await registerScan({ userId: userId ?? "", boothId });
 
       await stopScanner();
-      if (res.ok) {
+      if (result) {
         showSuccess("スタンプを獲得しました！");
-      } else {
-        showError(data.message || "エラーが発生しました");
       }
     } catch (err) {
       await stopScanner();
