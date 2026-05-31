@@ -10,7 +10,7 @@ import { TopBar } from "../_components/TopBar";
 import { Card } from "../_components/ui/Card";
 import { PillButton } from "../_components/ui/PillButton";
 import { StampCircle, type StampTone } from "../_components/ui/StampCircle";
-import { useUserId } from "../_hooks/useUserId";
+import { useUserId } from "@/hooks/useUserId";
 
 const DRAWER_ID = "main-drawer";
 const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"];
