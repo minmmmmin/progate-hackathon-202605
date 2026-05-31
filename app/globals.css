@@ -21,3 +21,14 @@
 body {
   font-family: var(--font-sans), "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
 }
+
+.qr-preview video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+#qr-video-container {
+  width: 100% !important;
+  height: 100% !important;
+}
