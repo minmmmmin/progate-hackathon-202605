@@ -2,7 +2,7 @@
 
 import { BookOpenCheck, ChevronLeft, Loader2, MapPin, User, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchBooths, fetchStamps } from "@/lib/stamps";
 import type { Booth } from "@/schemas";
 import { Sidebar } from "../_components/Sidebar";
@@ -24,7 +24,18 @@ export default function StampsPage() {
     collected?: Booth;
     tone: StampTone;
   } | null>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const { userId } = useUserId();
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (selectedBooth && !dialog.open) {
+      dialog.showModal();
+    } else if (!selectedBooth && dialog.open) {
+      dialog.close();
+    }
+  }, [selectedBooth]);
 
   useEffect(() => {
     if (!userId) return;
@@ -125,90 +136,94 @@ export default function StampsPage() {
       </div>
 
       {/* 詳細ダイアログ */}
-      {selectedBooth && (
-        <div className="modal modal-open modal-bottom sm:modal-middle">
-          <div className="modal-box overflow-hidden rounded-t-[2.5rem] p-0 sm:rounded-[2rem]">
-            <div
-              className={`h-32 w-full bg-gradient-to-br ${
-                selectedBooth.collected
-                  ? "from-secondary/20 to-primary/20"
-                  : "from-base-200 to-base-300"
-              } relative flex items-center justify-center`}
-            >
-              <button
-                className="btn btn-circle btn-sm btn-ghost absolute top-4 right-4"
-                onClick={() => setSelectedBooth(null)}
+      <dialog
+        ref={dialogRef}
+        className="modal modal-bottom sm:modal-middle"
+        onClose={() => setSelectedBooth(null)}
+      >
+        {selectedBooth && (
+          <>
+            <div className="modal-box overflow-hidden rounded-t-[2.5rem] p-0 sm:rounded-[2rem]">
+              <div
+                className={`h-32 w-full bg-gradient-to-br ${
+                  selectedBooth.collected
+                    ? "from-secondary/20 to-primary/20"
+                    : "from-base-200 to-base-300"
+                } relative flex items-center justify-center`}
               >
-                <X className="h-5 w-5" />
-              </button>
-              <div className="mt-16 w-32 translate-y-4 transform">
-                <StampCircle
-                  state={selectedBooth.collected ? "collected" : "locked"}
-                  imageSrc={selectedBooth.collected ? selectedBooth.booth.stamp_url : undefined}
-                  tone={selectedBooth.tone}
-                  size={32}
-                />
+                <form method="dialog">
+                  <button
+                    aria-label="閉じる"
+                    className="btn btn-circle btn-sm btn-ghost absolute top-4 right-4"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </form>
+                <div className="mt-16 w-32 translate-y-4 transform">
+                  <StampCircle
+                    state={selectedBooth.collected ? "collected" : "locked"}
+                    imageSrc={selectedBooth.collected ? selectedBooth.booth.stamp_url : undefined}
+                    tone={selectedBooth.tone}
+                    size={32}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center px-6 pt-16 pb-8 text-center">
+                <h3 className="text-base-content text-2xl font-black tracking-tight italic">
+                  {selectedBooth.booth.title}
+                </h3>
+
+                <div className="mt-6 w-full space-y-4">
+                  <div className="bg-base-200/50 flex items-center gap-3 rounded-2xl p-4">
+                    <div className="bg-base-100 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm">
+                      <MapPin className="h-5 w-5" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-base-content/40 text-[10px] font-bold tracking-widest uppercase">
+                        Location
+                      </div>
+                      <div className="text-base-content font-bold">{selectedBooth.booth.room}</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-base-200/50 flex items-center gap-3 rounded-2xl p-4">
+                    <div className="bg-base-100 text-secondary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm">
+                      <User className="h-5 w-5" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-base-content/40 text-[10px] font-bold tracking-widest uppercase">
+                        Stallholder
+                      </div>
+                      <div className="text-base-content font-bold">
+                        {selectedBooth.booth.stallholder}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {!selectedBooth.collected && (
+                  <div className="bg-base-200 text-base-content/70 mt-8 rounded-2xl px-6 py-4">
+                    <p className="text-sm font-bold">まだスタンプを持っていません</p>
+                    <p className="text-base-content/50 mt-1 text-xs">
+                      {selectedBooth.booth.room}に行ってスタンプをゲットしよう！
+                    </p>
+                  </div>
+                )}
+
+                <form method="dialog" className="mt-8 w-full">
+                  <button className="btn btn-block btn-primary rounded-2xl font-bold">
+                    とじる
+                  </button>
+                </form>
               </div>
             </div>
-
-            <div className="flex flex-col items-center px-6 pt-16 pb-8 text-center">
-              <h3 className="text-base-content text-2xl font-black tracking-tight italic">
-                {selectedBooth.booth.title}
-              </h3>
-
-              <div className="mt-6 w-full space-y-4">
-                <div className="bg-base-200/50 flex items-center gap-3 rounded-2xl p-4">
-                  <div className="bg-base-100 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm">
-                    <MapPin className="h-5 w-5" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-base-content/40 text-[10px] font-bold tracking-widest uppercase">
-                      Location
-                    </div>
-                    <div className="text-base-content font-bold">{selectedBooth.booth.room}</div>
-                  </div>
-                </div>
-
-                <div className="bg-base-200/50 flex items-center gap-3 rounded-2xl p-4">
-                  <div className="bg-base-100 text-secondary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm">
-                    <User className="h-5 w-5" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-base-content/40 text-[10px] font-bold tracking-widest uppercase">
-                      Stallholder
-                    </div>
-                    <div className="text-base-content font-bold">
-                      {selectedBooth.booth.stallholder}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {!selectedBooth.collected && (
-                <div className="bg-base-200 text-base-content/70 mt-8 rounded-2xl px-6 py-4">
-                  <p className="text-sm font-bold">まだスタンプを持っていません</p>
-                  <p className="text-base-content/50 mt-1 text-xs">
-                    {selectedBooth.booth.room}に行ってスタンプをゲットしよう！
-                  </p>
-                </div>
-              )}
-
-              <div className="mt-8 w-full">
-                <button
-                  className="btn btn-block btn-primary rounded-2xl font-bold"
-                  onClick={() => setSelectedBooth(null)}
-                >
-                  とじる
-                </button>
-              </div>
-            </div>
-          </div>
-          <div
-            className="modal-backdrop bg-base-content/40 backdrop-blur-sm"
-            onClick={() => setSelectedBooth(null)}
-          />
-        </div>
-      )}
+            <form method="dialog" className="modal-backdrop">
+              <button aria-label="閉じる">close</button>
+            </form>
+          </>
+        )}
+      </dialog>
     </div>
   );
 }
