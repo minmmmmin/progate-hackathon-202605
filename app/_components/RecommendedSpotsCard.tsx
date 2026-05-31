@@ -16,13 +16,14 @@ function congestionLabel(score: number): { text: string; tone: "green" | "yellow
   return { text: "混雑", tone: "red" };
 }
 
-function pickRandom<T>(arr: T[], n: number): T[] {
+/** Fisher-Yates shuffle */
+function shuffle<T>(arr: T[]): T[] {
   const copy = [...arr];
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
-  return copy.slice(0, n);
+  return copy;
 }
 
 export function RecommendedSpotsCard({ booths }: Props) {
@@ -30,7 +31,30 @@ export function RecommendedSpotsCard({ booths }: Props) {
 
   useEffect(() => {
     const vacant = booths.filter((b) => b.congestion_score < 5);
-    setDisplayBooths(pickRandom(vacant, 3));
+
+    if (vacant.length >= 3) {
+      // 空いているのが3つ以上 → ランダムに3つ
+      setDisplayBooths(shuffle(vacant).slice(0, 3));
+      return;
+    }
+
+    // 空いているのが3つ未満 → やや混雑以上から補充
+    const others = booths.filter((b) => b.congestion_score >= 5);
+
+    // スコアごとにグループ化し、各グループ内でシャッフル
+    const grouped = new Map<number, BoothWithCongestion[]>();
+    for (const b of others) {
+      const list = grouped.get(b.congestion_score) ?? [];
+      list.push(b);
+      grouped.set(b.congestion_score, list);
+    }
+
+    // スコア昇順、同じスコア内はランダムになるよう各グループをシャッフルして連結
+    const sortedScores = Array.from(grouped.keys()).sort((a, b) => a - b);
+    const shuffledOthers = sortedScores.flatMap((score) => shuffle(grouped.get(score)!));
+
+    const needed = 3 - vacant.length;
+    setDisplayBooths([...vacant, ...shuffledOthers.slice(0, needed)]);
   }, [booths]);
 
   if (displayBooths.length === 0) {
