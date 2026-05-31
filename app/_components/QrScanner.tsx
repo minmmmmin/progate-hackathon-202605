@@ -7,14 +7,19 @@ import { useToast } from "@/hooks/useToast";
 
 import { useUserId } from "@/hooks/useUserId";
 import { extractBoothIdFromTarget, registerScan } from "@/lib/scanRegistration";
+import type { Booth } from "@/schemas";
+
+type QrScannerProps = {
+  onRegistered?: (stamp: Booth) => void;
+};
 
 type ScanStatus = "idle" | "loading";
 
-export const QrScanner = () => {
+export const QrScanner = ({ onRegistered }: QrScannerProps) => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [scanStatus, setScanStatus] = useState<ScanStatus>("idle");
 
-  const { showSuccess, showError } = useToast();
+  const { showError } = useToast();
   const { userId } = useUserId();
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -74,8 +79,8 @@ export const QrScanner = () => {
       const result = await registerScan({ userId: userId ?? "", boothId });
 
       await stopScanner();
-      if (result) {
-        showSuccess("スタンプを獲得しました！");
+      if (result && onRegistered) {
+        onRegistered(result.booth);
       }
     } catch (err) {
       await stopScanner();

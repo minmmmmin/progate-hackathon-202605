@@ -16,9 +16,10 @@ const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"]
 
 type StampBookCardProps = {
   refreshKey?: number;
+  onStampAcquired?: (stamp: Booth) => void;
 };
 
-export function StampBookCard({ refreshKey = 0 }: StampBookCardProps) {
+export function StampBookCard({ refreshKey = 0, onStampAcquired }: StampBookCardProps) {
   const [booths, setBooths] = useState<Booth[]>([]);
   const [collectedStamps, setCollectedStamps] = useState<CollectedStamp[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,7 +124,7 @@ export function StampBookCard({ refreshKey = 0 }: StampBookCardProps) {
         </div>
       )}
       <div className="mt-4">
-        <QrScanner />
+        <QrScanner onRegistered={onStampAcquired} />
       </div>
     </Card>
   );
