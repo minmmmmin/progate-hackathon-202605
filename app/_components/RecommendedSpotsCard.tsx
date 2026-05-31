@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { MapPin, Sparkles, Users } from "lucide-react";
 import { Badge } from "./ui/Badge";
 import { Card } from "./ui/Card";
@@ -26,36 +26,35 @@ function shuffle<T>(arr: T[]): T[] {
   return copy;
 }
 
+function pickBooths(booths: BoothWithCongestion[]): BoothWithCongestion[] {
+  const vacant = booths.filter((b) => b.congestion_score < 5);
+
+  if (vacant.length >= 3) {
+    // 空いているのが3つ以上 → ランダムに3つ
+    return shuffle(vacant).slice(0, 3);
+  }
+
+  // 空いているのが3つ未満 → やや混雑以上から補充
+  const others = booths.filter((b) => b.congestion_score >= 5);
+
+  // スコアごとにグループ化し、各グループ内でシャッフル
+  const grouped = new Map<number, BoothWithCongestion[]>();
+  for (const b of others) {
+    const list = grouped.get(b.congestion_score) ?? [];
+    list.push(b);
+    grouped.set(b.congestion_score, list);
+  }
+
+  // スコア昇順、同じスコア内はランダムになるよう各グループをシャッフルして連結
+  const sortedScores = Array.from(grouped.keys()).sort((a, b) => a - b);
+  const shuffledOthers = sortedScores.flatMap((score) => shuffle(grouped.get(score)!));
+
+  const needed = 3 - vacant.length;
+  return [...vacant, ...shuffledOthers.slice(0, needed)];
+}
+
 export function RecommendedSpotsCard({ booths }: Props) {
-  const [displayBooths, setDisplayBooths] = useState<BoothWithCongestion[]>([]);
-
-  useEffect(() => {
-    const vacant = booths.filter((b) => b.congestion_score < 5);
-
-    if (vacant.length >= 3) {
-      // 空いているのが3つ以上 → ランダムに3つ
-      setDisplayBooths(shuffle(vacant).slice(0, 3));
-      return;
-    }
-
-    // 空いているのが3つ未満 → やや混雑以上から補充
-    const others = booths.filter((b) => b.congestion_score >= 5);
-
-    // スコアごとにグループ化し、各グループ内でシャッフル
-    const grouped = new Map<number, BoothWithCongestion[]>();
-    for (const b of others) {
-      const list = grouped.get(b.congestion_score) ?? [];
-      list.push(b);
-      grouped.set(b.congestion_score, list);
-    }
-
-    // スコア昇順、同じスコア内はランダムになるよう各グループをシャッフルして連結
-    const sortedScores = Array.from(grouped.keys()).sort((a, b) => a - b);
-    const shuffledOthers = sortedScores.flatMap((score) => shuffle(grouped.get(score)!));
-
-    const needed = 3 - vacant.length;
-    setDisplayBooths([...vacant, ...shuffledOthers.slice(0, needed)]);
-  }, [booths]);
+  const displayBooths = useMemo(() => pickBooths(booths), [booths]);
 
   if (displayBooths.length === 0) {
     return (
@@ -74,10 +73,7 @@ export function RecommendedSpotsCard({ booths }: Props) {
           const congestion = congestionLabel(booth.congestion_score);
 
           return (
-            <div
-              key={booth.id}
-              className="rounded-2xl border border-success/20 bg-success/5 p-4"
-            >
+            <div key={booth.id} className="border-success/20 bg-success/5 rounded-2xl border p-4">
               <div className="mb-2">
                 <Badge tone={congestion.tone}>{congestion.text}</Badge>
               </div>

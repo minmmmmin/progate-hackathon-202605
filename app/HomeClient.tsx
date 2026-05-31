@@ -73,10 +73,7 @@ export function HomeClient() {
     };
   }, [boothId, cleanUrl, handleStampAcquired, router, showError, userId]);
 
-  // ブース一覧を取得（マウント & showError の参照が変わったとき）
-  const showErrorRef = useRef(showError);
-  showErrorRef.current = showError;
-
+  // ブース一覧を取得（初回マウント時のみ）
   useEffect(() => {
     let cancelled = false;
 
@@ -87,7 +84,7 @@ export function HomeClient() {
         const data = (await res.json()) as { booths: BoothWithCongestion[] };
         if (!cancelled) setBooths(data.booths);
       } catch {
-        if (!cancelled) showErrorRef.current("ブース情報の取得に失敗しました");
+        if (!cancelled) showError("ブース情報の取得に失敗しました");
       }
     })();
 
