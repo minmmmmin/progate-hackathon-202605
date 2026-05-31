@@ -26,21 +26,20 @@ export default function AdminDashboard() {
 
       <div className="drawer-content flex flex-col">
         <div className="mx-auto w-full max-w-360 space-y-5 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-6 lg:px-8">
+          <AdminTopBar drawerId={DRAWER_ID} />
+
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-            <div className="hidden lg:block">
-              <AdminSidebar />
+            <div className="space-y-5 sm:space-y-6">
+              <div className="hidden lg:block">
+                <AdminSidebar />
+              </div>
+              <StatsRow />
+              <CongestionMapCard />
             </div>
 
-            <div className="space-y-5 sm:space-y-6">
-              <AdminTopBar drawerId={DRAWER_ID} />
-              <StatsRow />
-              <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
-                <div className="space-y-5 sm:space-y-6">
-                  <CongestionMapCard />
-                  <CongestionTable />
-                </div>
-                <SpotListCard />
-              </div>
+            <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
+              <CongestionTable />
+              <SpotListCard />
             </div>
           </div>
         </div>
