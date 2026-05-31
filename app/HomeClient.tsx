@@ -1,19 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CongestionCard } from "./_components/CongestionCard";
 import { CongestionTable } from "./_components/CongestionTable";
 import { RecommendedSpotsCard } from "./_components/RecommendedSpotsCard";
 import { Sidebar } from "./_components/Sidebar";
-import { StampAcquiredDialog } from "./_components/StampAcquiredDialog";
 import { StampBookCard } from "./_components/StampBookCard";
 import { TopBar } from "./_components/TopBar";
+import { useQrScanner } from "./_components/QrScanner";
 import { useUserId } from "../hooks/useUserId";
 import { useToast } from "@/hooks/useToast";
 import { registerScan } from "@/lib/scanRegistration";
 import { invalidateStamps } from "@/lib/stamps";
 import type { Booth, BoothWithCongestion } from "@/schemas";
+
 
 const DRAWER_ID = "main-drawer";
 
@@ -23,9 +24,9 @@ export function HomeClient() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { showError } = useToast();
+  const { notifyStampAcquired, acquiredStamp } = useQrScanner();
   const processedBoothIdRef = useRef<string | null>(null);
-  const [stampRefreshKey, setStampRefreshKey] = useState(0);
-  const [acquiredStamp, setAcquiredStamp] = useState<Booth | null>(null);
+  const stampRefreshKey = acquiredStamp?.id ?? "";
 
   const boothId = searchParams.get("id");
   const cleanSearchParams = new URLSearchParams(searchParams.toString());
@@ -34,15 +35,10 @@ export function HomeClient() {
     ? `${pathname}?${cleanSearchParams.toString()}`
     : pathname;
 
-  const handleStampAcquired = useCallback(
-    (booth: Booth) => {
-      if (!userId) return;
-      invalidateStamps(userId);
-      setStampRefreshKey((current) => current + 1);
-      setAcquiredStamp(booth);
-    },
-    [userId],
-  );
+  useEffect(() => {
+    if (!acquiredStamp || !userId) return;
+    invalidateStamps(userId);
+  }, [acquiredStamp, userId]);
 
   const [booths, setBooths] = useState<BoothWithCongestion[]>([]);
 
@@ -56,8 +52,8 @@ export function HomeClient() {
     void (async () => {
       try {
         const result = await registerScan({ userId, boothId });
-        handleStampAcquired(result.booth);
         if (cancelled) return;
+        notifyStampAcquired(result.booth);
       } catch (err) {
         if (cancelled) return;
         showError(err instanceof Error ? err.message : "通信エラーが発生しました。");
@@ -71,7 +67,7 @@ export function HomeClient() {
     return () => {
       cancelled = true;
     };
-  }, [boothId, cleanUrl, handleStampAcquired, router, showError, userId]);
+  }, [boothId, cleanUrl, notifyStampAcquired, router, showError, userId]);
 
   // ブース一覧を取得（初回マウント時のみ）
   useEffect(() => {
@@ -108,8 +104,7 @@ export function HomeClient() {
             </div>
 
             <main className="grid auto-rows-min grid-cols-1 gap-5 sm:gap-6">
-              <StampBookCard refreshKey={stampRefreshKey} onStampAcquired={handleStampAcquired} />
-
+              <StampBookCard refreshKey={stampRefreshKey} />
               <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
                 <CongestionCard />
                 <CongestionTable />
@@ -125,11 +120,6 @@ export function HomeClient() {
         <label htmlFor={DRAWER_ID} aria-label="メニューを閉じる" className="drawer-overlay" />
         <Sidebar refreshKey={stampRefreshKey} />
       </div>
-      <StampAcquiredDialog
-        key={acquiredStamp?.id ?? "none"}
-        stamp={acquiredStamp}
-        onClose={() => setAcquiredStamp(null)}
-      />
     </div>
   );
 }
