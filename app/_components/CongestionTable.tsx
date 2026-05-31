@@ -105,7 +105,7 @@ export function CongestionTable({ className = "" }: CongestionTableProps) {
           return (
             <div
               key={booth.id}
-              className="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3"
+              className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
             >
               <div className="flex items-center gap-3">
                 <div>
