@@ -1,14 +1,12 @@
 "use client";
 
-import { BookOpenCheck, ChevronLeft, Loader2, MapPin, User, X } from "lucide-react";
-import Link from "next/link";
+import { BookOpenCheck, Loader2, MapPin, User, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchBooths, fetchStamps, sortBooths, type SortMode } from "@/lib/stamps";
 import type { Booth, CollectedStamp } from "@/schemas";
 import { Sidebar } from "../_components/Sidebar";
 import { TopBar } from "../_components/TopBar";
 import { Card } from "../_components/ui/Card";
-import { PillButton } from "../_components/ui/PillButton";
 import { StampCircle, type StampTone } from "../_components/ui/StampCircle";
 import { useUserId } from "@/hooks/useUserId";
 
@@ -80,11 +78,6 @@ export default function StampsPage() {
 
             <main className="flex flex-col gap-5 sm:gap-6">
               <div className="flex items-center gap-4">
-                <Link href="/">
-                  <PillButton variant="outline" className="h-10 w-10 !p-0">
-                    <ChevronLeft className="h-5 w-5" />
-                  </PillButton>
-                </Link>
                 <h1 className="text-2xl font-extrabold tracking-tight italic">STAMP BOOK</h1>
               </div>
 
