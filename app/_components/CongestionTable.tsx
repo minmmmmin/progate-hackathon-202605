@@ -94,7 +94,7 @@ export function CongestionTable({ className = "" }: CongestionTableProps) {
   return (
     <Card icon={<Signal className="h-5 w-5" />} title="混雑状況" className={className}>
       {/* ソート切り替え */}
-      <div className="mb-3 flex items-center justify-end">
+      <div className="mb-3 flex">
         <SegmentedControl
           options={[
             { value: "room", label: "場所順" },

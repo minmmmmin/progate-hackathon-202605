@@ -7,6 +7,7 @@ import { fetchBooths, fetchStamps, sortBooths, type SortMode } from "@/lib/stamp
 
 import type { Booth, CollectedStamp } from "@/schemas";
 import { Card } from "./ui/Card";
+import { SegmentedControl } from "./ui/SegmentedControl";
 import { PillButton } from "./ui/PillButton";
 import { StampCircle, type StampTone } from "./ui/StampCircle";
 import { useQrScanner } from "./QrScanner";
@@ -68,47 +69,37 @@ export function StampBookCard({ refreshKey = 0 }: StampBookCardProps) {
         )
       }
     >
-      <div role="tablist" className="tabs tabs-boxed tabs-sm bg-base-200/60 w-fit">
-        <button
-          type="button"
-          role="tab"
-          className={`tab ${sortMode === "class" ? "tab-active" : ""}`}
-          onClick={() => setSortMode("class")}
-        >
-          クラス順
-        </button>
-        <button
-          type="button"
-          role="tab"
-          className={`tab ${sortMode === "acquired" ? "tab-active" : ""}`}
-          onClick={() => setSortMode("acquired")}
-        >
-          入手順
-        </button>
-      </div>
+      <SegmentedControl
+        options={[
+          { value: "class", label: "クラス順" },
+          { value: "acquired", label: "入手順" },
+        ]}
+        value={sortMode}
+        onChange={setSortMode}
+      />
 
       <div className="grid grid-cols-4 gap-x-2 gap-y-5 py-2 sm:grid-cols-5">
         {loading
           ? Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="flex flex-col items-center gap-2">
-                <div className="bg-base-content/5 aspect-square w-full max-w-24 animate-pulse rounded-full" />
-                <div className="bg-base-content/5 h-3 w-12 animate-pulse rounded" />
-              </div>
-            ))
+            <div key={i} className="flex flex-col items-center gap-2">
+              <div className="bg-base-content/5 aspect-square w-full max-w-24 animate-pulse rounded-full" />
+              <div className="bg-base-content/5 h-3 w-12 animate-pulse rounded" />
+            </div>
+          ))
           : displayBooths.map((booth, idx) => {
-              const isCollected = collectedMap.has(booth.id);
-              return isCollected ? (
-                <StampCircle
-                  key={booth.id}
-                  state="collected"
-                  imageSrc={booth.stamp_url}
-                  label={booth.title}
-                  tone={tones[idx % tones.length]}
-                />
-              ) : (
-                <StampCircle key={booth.id} state="locked" label={booth.title} />
-              );
-            })}
+            const isCollected = collectedMap.has(booth.id);
+            return isCollected ? (
+              <StampCircle
+                key={booth.id}
+                state="collected"
+                imageSrc={booth.stamp_url}
+                label={booth.title}
+                tone={tones[idx % tones.length]}
+              />
+            ) : (
+              <StampCircle key={booth.id} state="locked" label={booth.title} />
+            );
+          })}
       </div>
       {!loading && (
         <div className="mt-6 hidden justify-center lg:flex">
