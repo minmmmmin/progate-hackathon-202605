@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Flag, Loader2 } from "lucide-react";
+import { Camera, ChevronRight, Flag, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { fetchBooths, fetchStamps, sortBooths, type SortMode } from "@/lib/stamps";
@@ -9,7 +9,7 @@ import type { Booth, CollectedStamp } from "@/schemas";
 import { Card } from "./ui/Card";
 import { PillButton } from "./ui/PillButton";
 import { StampCircle, type StampTone } from "./ui/StampCircle";
-import { QrScanner } from "./QrScanner";
+import { useQrScanner } from "./QrScanner";
 import { useUserId } from "@/hooks/useUserId";
 
 const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"];
@@ -20,6 +20,7 @@ export function StampBookCard() {
   const [loading, setLoading] = useState(true);
   const [sortMode, setSortMode] = useState<SortMode>("class");
   const { userId } = useUserId();
+  const { open: openScanner } = useQrScanner();
 
   useEffect(() => {
     if (!userId) return;
@@ -119,7 +120,14 @@ export function StampBookCard() {
         </div>
       )}
       <div className="mt-4">
-        <QrScanner />
+        <button
+          type="button"
+          onClick={openScanner}
+          className="btn btn-primary btn-lg w-full rounded-full shadow-lg"
+        >
+          <Camera className="h-5 w-5" />
+          カメラを起動してスタンプGET
+        </button>
       </div>
     </Card>
   );
