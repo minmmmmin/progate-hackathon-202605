@@ -110,31 +110,31 @@ export default function StampsPage() {
                 <div className="grid grid-cols-3 gap-x-2 gap-y-10 py-6 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
                   {loading
                     ? Array.from({ length: 12 }).map((_, i) => (
-                      <div key={i} className="flex flex-col items-center gap-2">
-                        <div className="bg-base-content/5 aspect-square w-full max-w-24 animate-pulse rounded-full" />
-                        <div className="bg-base-content/5 h-3 w-16 animate-pulse rounded" />
-                      </div>
-                    ))
+                        <div key={i} className="flex flex-col items-center gap-2">
+                          <div className="bg-base-content/5 aspect-square w-full max-w-24 animate-pulse rounded-full" />
+                          <div className="bg-base-content/5 h-3 w-16 animate-pulse rounded" />
+                        </div>
+                      ))
                     : sortedBooths.map((booth, idx) => {
-                      const collected = collectedMap.get(booth.id);
-                      const tone = tones[idx % tones.length];
-                      return (
-                        <button
-                          key={booth.id}
-                          type="button"
-                          className="group flex flex-col items-center transition-transform active:scale-95"
-                          onClick={() => setSelectedBooth({ booth, collected, tone })}
-                        >
-                          <StampCircle
-                            state={collected ? "collected" : "locked"}
-                            imageSrc={collected ? booth.stamp_url : undefined}
-                            label={booth.title}
-                            tone={tone}
-                            size={20}
-                          />
-                        </button>
-                      );
-                    })}
+                        const collected = collectedMap.get(booth.id);
+                        const tone = tones[idx % tones.length];
+                        return (
+                          <button
+                            key={booth.id}
+                            type="button"
+                            className="group flex flex-col items-center transition-transform active:scale-95"
+                            onClick={() => setSelectedBooth({ booth, collected, tone })}
+                          >
+                            <StampCircle
+                              state={collected ? "collected" : "locked"}
+                              imageSrc={collected ? booth.stamp_url : undefined}
+                              label={booth.title}
+                              tone={tone}
+                              size={20}
+                            />
+                          </button>
+                        );
+                      })}
                 </div>
               </Card>
             </main>
@@ -157,10 +157,11 @@ export default function StampsPage() {
           <>
             <div className="modal-box overflow-hidden rounded-t-[2.5rem] p-0 sm:rounded-4xl">
               <div
-                className={`bg-liner-to-br h-32 w-full ${selectedBooth.collected
-                  ? "from-secondary/20 to-primary/20"
-                  : "from-base-200 to-base-300"
-                  } relative flex items-center justify-center`}
+                className={`bg-liner-to-br h-32 w-full ${
+                  selectedBooth.collected
+                    ? "from-secondary/20 to-primary/20"
+                    : "from-base-200 to-base-300"
+                } relative flex items-center justify-center`}
               >
                 <form method="dialog">
                   <button

@@ -81,25 +81,25 @@ export function StampBookCard({ refreshKey = 0 }: StampBookCardProps) {
       <div className="grid grid-cols-4 gap-x-2 gap-y-5 py-2 sm:grid-cols-5">
         {loading
           ? Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="flex flex-col items-center gap-2">
-              <div className="bg-base-content/5 aspect-square w-full max-w-24 animate-pulse rounded-full" />
-              <div className="bg-base-content/5 h-3 w-12 animate-pulse rounded" />
-            </div>
-          ))
+              <div key={i} className="flex flex-col items-center gap-2">
+                <div className="bg-base-content/5 aspect-square w-full max-w-24 animate-pulse rounded-full" />
+                <div className="bg-base-content/5 h-3 w-12 animate-pulse rounded" />
+              </div>
+            ))
           : displayBooths.map((booth, idx) => {
-            const isCollected = collectedMap.has(booth.id);
-            return isCollected ? (
-              <StampCircle
-                key={booth.id}
-                state="collected"
-                imageSrc={booth.stamp_url}
-                label={booth.title}
-                tone={tones[idx % tones.length]}
-              />
-            ) : (
-              <StampCircle key={booth.id} state="locked" label={booth.title} />
-            );
-          })}
+              const isCollected = collectedMap.has(booth.id);
+              return isCollected ? (
+                <StampCircle
+                  key={booth.id}
+                  state="collected"
+                  imageSrc={booth.stamp_url}
+                  label={booth.title}
+                  tone={tones[idx % tones.length]}
+                />
+              ) : (
+                <StampCircle key={booth.id} state="locked" label={booth.title} />
+              );
+            })}
       </div>
       {!loading && (
         <div className="mt-6 hidden justify-center lg:flex">
