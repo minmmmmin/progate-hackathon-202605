@@ -32,7 +32,7 @@ export function BottomTabBar() {
         <li className="flex-1">
           <button
             type="button"
-            onClick={openScanner}
+            onClick={() => openScanner()}
             className="text-primary flex w-full flex-col items-center gap-1 py-1.5 text-[11px] font-bold transition-transform active:scale-95"
           >
             <span className="bg-primary text-primary-content flex h-12 w-12 items-center justify-center rounded-full shadow-md">

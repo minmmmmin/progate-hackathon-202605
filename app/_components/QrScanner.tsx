@@ -5,11 +5,17 @@ import { Html5Qrcode } from "html5-qrcode";
 import { X } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import { useUserId } from "@/hooks/useUserId";
+import { extractBoothIdFromTarget, registerScan } from "@/lib/scanRegistration";
+import type { Booth } from "@/schemas";
 
 type ScanStatus = "idle" | "loading";
 
+type OpenOptions = {
+  onRegistered?: (booth: Booth) => void;
+};
+
 type QrScannerContextValue = {
-  open: () => void;
+  open: (options?: OpenOptions) => void;
   close: () => void;
 };
 
@@ -21,19 +27,36 @@ export function useQrScanner() {
   return ctx;
 }
 
+type ProviderState = {
+  isOpen: boolean;
+  onRegistered?: (booth: Booth) => void;
+};
+
 export function QrScannerProvider({ children }: { children: ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [state, setState] = useState<ProviderState>({ isOpen: false });
+
+  const open = (options?: OpenOptions) => {
+    setState({ isOpen: true, onRegistered: options?.onRegistered });
+  };
+  const close = () => {
+    setState({ isOpen: false });
+  };
+
   return (
-    <QrScannerContext.Provider
-      value={{ open: () => setIsOpen(true), close: () => setIsOpen(false) }}
-    >
+    <QrScannerContext.Provider value={{ open, close }}>
       {children}
-      {isOpen && <QrScannerModal onClose={() => setIsOpen(false)} />}
+      {state.isOpen && <QrScannerModal onClose={close} onRegistered={state.onRegistered} />}
     </QrScannerContext.Provider>
   );
 }
 
-function QrScannerModal({ onClose }: { onClose: () => void }) {
+function QrScannerModal({
+  onClose,
+  onRegistered,
+}: {
+  onClose: () => void;
+  onRegistered?: (booth: Booth) => void;
+}) {
   const [scanStatus, setScanStatus] = useState<ScanStatus>("idle");
   const { showSuccess, showError } = useToast();
   const { userId } = useUserId();
@@ -73,14 +96,7 @@ function QrScannerModal({ onClose }: { onClose: () => void }) {
       setScanStatus("loading");
 
       try {
-        let boothId: string | null = null;
-        try {
-          const url = new URL(decodedText);
-          boothId = url.searchParams.get("id");
-        } catch {
-          throw new Error("QRコードの読み取りに失敗しました");
-        }
-
+        const boothId = extractBoothIdFromTarget(decodedText);
         if (!boothId) {
           throw new Error("無効なQRコードです");
         }
@@ -89,18 +105,13 @@ function QrScannerModal({ onClose }: { onClose: () => void }) {
           throw new Error("ユーザー情報を取得中です。少し待ってからもう一度お試しください。");
         }
 
-        const res = await fetch("/api/scans", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: userId, booth_id: boothId }),
-        });
-        const data = await res.json();
+        const result = await registerScan({ userId, boothId });
 
         await closeModal();
-        if (res.ok) {
-          showSuccess("スタンプを獲得しました！");
+        if (onRegistered) {
+          onRegistered(result.booth);
         } else {
-          showError(data.message || "エラーが発生しました");
+          showSuccess("スタンプを獲得しました！");
         }
       } catch (err) {
         await closeModal();
