@@ -15,11 +15,10 @@ import { useUserId } from "@/hooks/useUserId";
 const tones: StampTone[] = ["pink", "peach", "mint", "sky", "lemon", "lavender"];
 
 type StampBookCardProps = {
-  refreshKey?: number;
-  onStampAcquired?: (stamp: Booth) => void;
+  refreshKey?: number | string;
 };
 
-export function StampBookCard({ refreshKey = 0, onStampAcquired }: StampBookCardProps) {
+export function StampBookCard({ refreshKey = 0 }: StampBookCardProps) {
   const [booths, setBooths] = useState<Booth[]>([]);
   const [collectedStamps, setCollectedStamps] = useState<CollectedStamp[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,7 +126,7 @@ export function StampBookCard({ refreshKey = 0, onStampAcquired }: StampBookCard
       <div className="mt-4 hidden lg:block">
         <button
           type="button"
-          onClick={() => openScanner({ onRegistered: onStampAcquired })}
+          onClick={() => openScanner()}
           className="btn btn-primary btn-lg w-full rounded-full shadow-lg"
         >
           <Camera className="h-5 w-5" />

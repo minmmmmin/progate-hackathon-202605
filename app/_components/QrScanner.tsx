@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/useToast";
 import { useUserId } from "@/hooks/useUserId";
 import { extractBoothIdFromTarget, registerScan } from "@/lib/scanRegistration";
 import type { Booth } from "@/schemas";
+import { StampAcquiredDialog } from "./StampAcquiredDialog";
 
 type ScanStatus = "idle" | "loading";
 
@@ -17,6 +18,8 @@ type OpenOptions = {
 type QrScannerContextValue = {
   open: (options?: OpenOptions) => void;
   close: () => void;
+  notifyStampAcquired: (booth: Booth) => void;
+  acquiredStamp: Booth | null;
 };
 
 const QrScannerContext = createContext<QrScannerContextValue | null>(null);
@@ -34,6 +37,7 @@ type ProviderState = {
 
 export function QrScannerProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ProviderState>({ isOpen: false });
+  const [acquiredStamp, setAcquiredStamp] = useState<Booth | null>(null);
 
   const open = (options?: OpenOptions) => {
     setState({ isOpen: true, onRegistered: options?.onRegistered });
@@ -41,11 +45,24 @@ export function QrScannerProvider({ children }: { children: ReactNode }) {
   const close = () => {
     setState({ isOpen: false });
   };
+  const notifyStampAcquired = (booth: Booth) => {
+    setAcquiredStamp(booth);
+  };
+
+  const handleRegistered = (booth: Booth) => {
+    state.onRegistered?.(booth);
+    notifyStampAcquired(booth);
+  };
 
   return (
-    <QrScannerContext.Provider value={{ open, close }}>
+    <QrScannerContext.Provider value={{ open, close, notifyStampAcquired, acquiredStamp }}>
       {children}
-      {state.isOpen && <QrScannerModal onClose={close} onRegistered={state.onRegistered} />}
+      {state.isOpen && <QrScannerModal onClose={close} onRegistered={handleRegistered} />}
+      <StampAcquiredDialog
+        key={acquiredStamp?.id ?? "none"}
+        stamp={acquiredStamp}
+        onClose={() => setAcquiredStamp(null)}
+      />
     </QrScannerContext.Provider>
   );
 }
@@ -55,10 +72,10 @@ function QrScannerModal({
   onRegistered,
 }: {
   onClose: () => void;
-  onRegistered?: (booth: Booth) => void;
+  onRegistered: (booth: Booth) => void;
 }) {
   const [scanStatus, setScanStatus] = useState<ScanStatus>("idle");
-  const { showSuccess, showError } = useToast();
+  const { showError } = useToast();
   const { userId } = useUserId();
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -108,11 +125,7 @@ function QrScannerModal({
         const result = await registerScan({ userId, boothId });
 
         await closeModal();
-        if (onRegistered) {
-          onRegistered(result.booth);
-        } else {
-          showSuccess("スタンプを獲得しました！");
-        }
+        onRegistered(result.booth);
       } catch (err) {
         await closeModal();
         showError(err instanceof Error ? err.message : "通信エラーが発生しました。");
