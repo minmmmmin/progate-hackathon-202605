@@ -1,5 +1,5 @@
 import { Bell, HelpCircle, LogOut, Menu } from "lucide-react";
-import Link from "next/link";
+import { useAuth } from "../_hooks/useAuth";
 
 type AdminTopBarProps = {
   drawerId: string;
@@ -7,6 +7,8 @@ type AdminTopBarProps = {
 };
 
 export function AdminTopBar({ drawerId, lastUpdated }: AdminTopBarProps) {
+  const { logout } = useAuth();
+
   return (
     <header className="flex flex-wrap items-start justify-between gap-3">
       <div className="flex items-start gap-3">
@@ -40,13 +42,19 @@ export function AdminTopBar({ drawerId, lastUpdated }: AdminTopBarProps) {
           <HelpCircle className="h-4 w-4" />
           ヘルプ
         </button>
-        <Link
-          href="/admin/login"
+        <button
+          type="button"
           className="btn btn-outline btn-primary btn-sm bg-base-100 rounded-full font-semibold"
+          onClick={(e) => {
+            e.preventDefault();
+            logout().then(() => {
+              window.location.href = "/admin/login";
+            });
+          }}
         >
           <LogOut className="h-4 w-4" />
           ログアウト
-        </Link>
+        </button>
       </div>
     </header>
   );
